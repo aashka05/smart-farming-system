@@ -1,0 +1,104 @@
+{
+  "Rice": {
+    "image": "🌾",
+    "diseases": [
+      {
+        "name": "Blast (Pyricularia oryzae)",
+        "symptoms": ["Diamond-shaped lesions on leaves", "Gray-green lesions turning white", "Node rot and neck blast", "Panicle blanking"],
+        "causes": ["Fungal pathogen Magnaporthe oryzae", "High humidity (>90%)", "Excessive nitrogen fertilization", "Dense planting"],
+        "remedies": ["Apply Tricyclazole 75% WP (0.6g/L)", "Spray Isoprothiolane 40% EC", "Use Carbendazim 50% WP", "Remove infected plant debris"],
+        "prevention": ["Use resistant varieties (e.g., IR64, Pusa Basmati)", "Balanced nitrogen application", "Proper field drainage", "Seed treatment with fungicide"]
+      },
+      {
+        "name": "Brown Spot (Bipolaris oryzae)",
+        "symptoms": ["Brown oval spots on leaves", "Spots with gray center", "Seedling blight", "Poor grain filling"],
+        "causes": ["Fungal infection", "Nutrient deficiency (especially potassium)", "Water stress", "Poor soil fertility"],
+        "remedies": ["Apply Mancozeb 75% WP", "Spray Propiconazole 25% EC", "Foliar application of potassium", "Improve soil nutrition"],
+        "prevention": ["Balanced fertilization", "Adequate water management", "Use certified disease-free seeds", "Maintain soil organic matter"]
+      },
+      {
+        "name": "Bacterial Leaf Blight (Xanthomonas oryzae)",
+        "symptoms": ["Yellow-white lesions along leaf margins", "Leaves dry from tip", "Wilting of seedlings", "Milky bacterial ooze from cut leaves"],
+        "causes": ["Bacterial pathogen", "Wounds from wind or insects", "Contaminated water", "High temperature and humidity"],
+        "remedies": ["Spray Streptomycin sulphate + Tetracycline", "Apply copper-based bactericides", "Drain fields to reduce humidity", "Remove and destroy infected plants"],
+        "prevention": ["Use resistant varieties", "Avoid clipping during transplanting", "Balanced nitrogen use", "Clean irrigation water"]
+      }
+    ]
+  },
+  "Wheat": {
+    "image": "🌿",
+    "diseases": [
+      {
+        "name": "Rust (Puccinia triticina)",
+        "symptoms": ["Orange-brown pustules on leaves", "Yellow streaks on stems", "Premature leaf senescence", "Reduced grain size"],
+        "causes": ["Fungal spores spread by wind", "Moderate temperatures (15-25°C)", "High humidity", "Susceptible varieties"],
+        "remedies": ["Apply Propiconazole 25% EC", "Spray Tebuconazole", "Use Mancozeb + Carbendazim", "Apply at first sign of rust"],
+        "prevention": ["Grow resistant varieties (e.g., HD 2967, PBW 343)", "Early sowing", "Remove volunteer wheat plants", "Balanced fertilization"]
+      },
+      {
+        "name": "Powdery Mildew (Blumeria graminis)",
+        "symptoms": ["White powdery growth on leaves", "Yellowing of affected areas", "Reduced photosynthesis", "Stunted growth"],
+        "causes": ["Fungal pathogen", "Cool humid conditions", "Dense canopy", "Excessive nitrogen"],
+        "remedies": ["Spray Sulphur 80% WP", "Apply Karathane 48% EC", "Use Triadimefon 25% WP", "Improve air circulation"],
+        "prevention": ["Resistant varieties", "Avoid excessive nitrogen", "Proper plant spacing", "Timely sowing"]
+      }
+    ]
+  },
+  "Cotton": {
+    "image": "☁️",
+    "diseases": [
+      {
+        "name": "Bacterial Blight (Xanthomonas citri)",
+        "symptoms": ["Angular water-soaked lesions", "Black arm on stems", "Boll rot", "Premature boll opening"],
+        "causes": ["Bacterial pathogen", "Rain splash", "Contaminated seeds", "Warm humid weather"],
+        "remedies": ["Spray Copper hydroxide", "Apply Streptomycin sulphate", "Remove infected plants", "Improve drainage"],
+        "prevention": ["Use acid-delinted treated seeds", "Grow resistant varieties", "Crop rotation with non-host crops", "Proper plant spacing"]
+      },
+      {
+        "name": "Fusarium Wilt (Fusarium oxysporum)",
+        "symptoms": ["Yellowing and wilting of leaves", "Brown discoloration of vascular tissue", "Stunted growth", "Plant death in severe cases"],
+        "causes": ["Soil-borne fungus", "Warm soil temperatures", "Nematode damage", "Acidic soils"],
+        "remedies": ["Apply Carbendazim soil drench", "Use Trichoderma-based biocontrol", "Improve soil drainage", "Balanced nutrition"],
+        "prevention": ["Resistant varieties", "Crop rotation (3-4 years)", "Soil solarization", "Nematode management"]
+      }
+    ]
+  },
+  "Maize": {
+    "image": "🌽",
+    "diseases": [
+      {
+        "name": "Turcicum Leaf Blight (Exserohilum turcicum)",
+        "symptoms": ["Long elliptical gray-green lesions", "Lesions expand to 15-20 cm", "Severe blighting in humid conditions", "Reduced cob size"],
+        "causes": ["Fungal pathogen", "Moderate temperature (18-27°C)", "Heavy dew and rainfall", "Continuous maize cropping"],
+        "remedies": ["Spray Mancozeb 75% WP", "Apply Zineb 75% WP", "Use Propiconazole 25% EC", "Remove lower infected leaves"],
+        "prevention": ["Resistant hybrids", "Crop rotation", "Balanced fertilization", "Destroy crop residues"]
+      },
+      {
+        "name": "Maydis Leaf Blight (Bipolaris maydis)",
+        "symptoms": ["Small diamond-shaped tan lesions", "Lesions limited by veins", "Premature drying", "Poor grain fill"],
+        "causes": ["Fungal infection", "Warm humid weather", "Dense planting", "Susceptible genotypes"],
+        "remedies": ["Apply Mancozeb 75% WP", "Spray Carbendazim 50% WP", "Foliar fungicide application", "Improve air circulation"],
+        "prevention": ["Use tolerant varieties", "Optimal plant population", "Remove infected debris", "Timely sowing"]
+      }
+    ]
+  },
+  "Sugarcane": {
+    "image": "🎋",
+    "diseases": [
+      {
+        "name": "Red Rot (Colletotrichum falcatum)",
+        "symptoms": ["Red discoloration of internal tissue", "White patches within red areas", "Drying of crown leaves", "Stalk shrinkage and hollowing"],
+        "causes": ["Fungal pathogen", "Waterlogging", "Infected seed cane", "Borer damage"],
+        "remedies": ["Remove and destroy infected clumps", "Apply Carbendazim drench", "Improve field drainage", "Use disease-free setts"],
+        "prevention": ["Resistant varieties (e.g., Co 0238, CoS 767)", "Sett treatment with fungicide", "Crop rotation", "Proper drainage management"]
+      },
+      {
+        "name": "Smut (Sporisorium scitamineum)",
+        "symptoms": ["Black whip-like structure from growing point", "Thin grassy shoots", "Profuse tillering", "No millable canes"],
+        "causes": ["Fungal pathogen", "Airborne spores", "Infected seed material", "Ratoon crops more susceptible"],
+        "remedies": ["Remove and burn smutted whips", "Roguing infected plants", "Apply Propiconazole", "Do not ratoon infected fields"],
+        "prevention": ["Hot water treatment of setts (52°C for 30 min)", "Disease-free seed material", "Resistant varieties", "Avoid ratooning susceptible varieties"]
+      }
+    ]
+  }
+}
