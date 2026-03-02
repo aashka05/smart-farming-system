@@ -70,11 +70,11 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3 text-primary-200 text-sm">
                 <HiPhone className="w-5 h-5 flex-shrink-0" />
-                1800-FARM-HELP (Toll Free)
+                9XXXXXXXXX (Toll Free)
               </li>
               <li className="flex items-start gap-3 text-primary-200 text-sm">
                 <HiLocationMarker className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                Smart Farming Lab, Agricultural University, India
+                Birla Vishvakarma Mahavidyalaya, Gujarat, India
               </li>
             </ul>
           </div>
