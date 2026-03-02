@@ -27,3 +27,8 @@ npm install
 ```bash
 npm run dev
 ```
+## Use dummy data
+```bash
+psql -U sfs_admin1 -d postgres -c "CREATE DATABASE sfs_db OWNER sfs_admin1;"
+psql -U sfs_admin1 -d sfs_db -f dummy_data.sql
+```
