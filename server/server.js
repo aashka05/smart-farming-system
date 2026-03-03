@@ -3,17 +3,20 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
 
-// Load environment variables (absolute path so it works from any CWD)
+// Load environment variables BEFORE importing db (pool reads process.env)
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-// Connect to MongoDB only if URI is configured
-if (process.env.MONGO_URI) {
-  connectDB();
-} else {
-  console.log('⚠️  MONGO_URI not set — running without database');
-}
+const pool = require('./config/db');
+
+// Test PostgreSQL connection (non-blocking)
+pool.query('SELECT 1', (err) => {
+  if (err) {
+    console.log('⚠️  PostgreSQL connection test failed:', err.message);
+  } else {
+    console.log('✅ PostgreSQL connected successfully');
+  }
+});
 
 const app = express();
 
@@ -35,6 +38,7 @@ app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/weather-station', require('./routes/weatherStationRoutes'));
 app.use('/api/station', require('./routes/weatherStationRoutes'));
 app.use('/api/translate', require('./routes/translateRoutes'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 
 // --------------- Health Check ---------------
 app.get('/api/health', (req, res) => {
