@@ -103,7 +103,7 @@ function App() {
               <Route path="/dashboard/crop-health" element={<ProtectedRoute><CropHealth /></ProtectedRoute>} />
               <Route path="/dashboard/yield-prediction" element={<ProtectedRoute><YieldPrediction /></ProtectedRoute>} />
               <Route path="/dashboard/irrigation" element={<ProtectedRoute><IrrigationAdvisory /></ProtectedRoute>} />
-              <Route path="/dashboard/chatbot" element={<ProtectedRoute><AIChatbot /></ProtectedRoute>} />
+              <Route path="/dashboard/chatbot" element={<AIChatbot />} />
             </Routes>
           </motion.div>
         </AnimatePresence>
