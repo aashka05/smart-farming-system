@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { HiMail, HiLockClosed, HiEye, HiEyeOff } from 'react-icons/hi';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { useTranslation } from '../utils/useTranslation';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,16 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const lStrings = useMemo(() => ({
+    welcomeBack: 'Welcome Back',
+    signInSubtitle: 'Sign in to your farming dashboard',
+    email: 'Email', password: 'Password',
+    signIn: 'Sign In',
+    noAccount: "Don't have an account?",
+    registerHere: 'Register here',
+  }), []);
+  const { t: lt } = useTranslation(lStrings);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,13 +49,13 @@ export default function Login() {
           {/* Header */}
           <div className="text-center mb-8">
             <span className="text-5xl mb-4 block">🌾</span>
-            <h1 className="font-display font-bold text-2xl text-gray-800 dark:text-white">Welcome Back</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Sign in to your farming dashboard</p>
+            <h1 className="font-display font-bold text-2xl text-gray-800 dark:text-white">{lt.welcomeBack}</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">{lt.signInSubtitle}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{lt.email}</label>
               <div className="relative">
                 <HiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -59,7 +70,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{lt.password}</label>
               <div className="relative">
                 <HiLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -88,15 +99,15 @@ export default function Login() {
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                'Sign In'
+                lt.signIn
               )}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-            Don't have an account?{' '}
+            {lt.noAccount}{' '}
             <Link to="/register" className="text-primary-600 dark:text-primary-400 font-semibold hover:underline">
-              Register here
+              {lt.registerHere}
             </Link>
           </p>
         </div>

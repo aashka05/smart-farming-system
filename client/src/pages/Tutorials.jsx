@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import TutorialCard from '../components/TutorialCard';
+import { useTranslation } from '../utils/useTranslation';
 
 const categories = ['All', 'Organic Farming', 'Drip Irrigation', 'Pest Control', 'Seasonal Crop Planning', 'Soil Health'];
 
@@ -22,6 +23,14 @@ const tutorials = [
 export default function Tutorials() {
   const [activeCategory, setActiveCategory] = useState('All');
 
+  const tStrings = useMemo(() => ({
+    title: 'Farming Tutorials',
+    subtitle: 'Learn modern farming techniques through expert video tutorials',
+    noTutorials: 'No tutorials in this category yet.',
+    note: 'Tutorial videos will be integrated with YouTube Data API for real video content.',
+  }), []);
+  const { t: tt } = useTranslation(tStrings);
+
   const filtered = activeCategory === 'All'
     ? tutorials
     : tutorials.filter((t) => t.category === activeCategory);
@@ -30,9 +39,9 @@ export default function Tutorials() {
     <div className="min-h-screen bg-gradient-to-b from-primary-50/30 to-white dark:from-dark-bg dark:to-dark-card">
       <div className="section-container">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <h1 className="section-title">🎓 Farming Tutorials</h1>
+          <h1 className="section-title">🎓 {tt.title}</h1>
           <p className="section-subtitle">
-            Learn modern farming techniques through expert video tutorials
+            {tt.subtitle}
           </p>
         </motion.div>
 
@@ -70,13 +79,13 @@ export default function Tutorials() {
         {filtered.length === 0 && (
           <div className="text-center py-16">
             <span className="text-5xl mb-4 block">📹</span>
-            <p className="text-gray-500 dark:text-gray-400">No tutorials in this category yet.</p>
+            <p className="text-gray-500 dark:text-gray-400">{tt.noTutorials}</p>
           </div>
         )}
 
         {/* Note */}
         <p className="text-xs text-gray-400 text-center mt-8">
-          ℹ️ Tutorial videos will be integrated with YouTube Data API for real video content.
+          ℹ️ {tt.note}
         </p>
       </div>
     </div>

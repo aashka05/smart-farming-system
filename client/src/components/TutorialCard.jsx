@@ -1,6 +1,11 @@
 import { HiPlay } from 'react-icons/hi';
+import { useMemo } from 'react';
+import { useTranslation } from '../utils/useTranslation';
 
 export default function TutorialCard({ tutorial }) {
+  const tcStrings = useMemo(() => ({ watchTutorial: 'Watch Tutorial' }), []);
+  const { t: tc } = useTranslation(tcStrings);
+
   return (
     <div className="glass-card-hover overflow-hidden group">
       {/* Thumbnail */}
@@ -32,7 +37,7 @@ export default function TutorialCard({ tutorial }) {
         </p>
         <button className="mt-4 w-full py-2.5 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold text-sm hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors flex items-center justify-center gap-2">
           <HiPlay className="w-4 h-4" />
-          Watch Tutorial
+          {tc.watchTutorial}
         </button>
       </div>
     </div>

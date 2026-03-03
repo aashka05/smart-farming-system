@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { HiUser, HiMail, HiLockClosed, HiEye, HiEyeOff } from 'react-icons/hi';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { useTranslation } from '../utils/useTranslation';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -14,6 +15,17 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  const rStrings = useMemo(() => ({
+    createAccount: 'Create Account',
+    joinRevolution: 'Join the smart farming revolution',
+    fullName: 'Full Name', email: 'Email',
+    password: 'Password', confirmPassword: 'Confirm Password',
+    createBtn: 'Create Account',
+    haveAccount: 'Already have an account?',
+    signIn: 'Sign in',
+  }), []);
+  const { t: rt } = useTranslation(rStrings);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,13 +60,13 @@ export default function Register() {
           {/* Header */}
           <div className="text-center mb-8">
             <span className="text-5xl mb-4 block">🌱</span>
-            <h1 className="font-display font-bold text-2xl text-gray-800 dark:text-white">Create Account</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Join the smart farming revolution</p>
+            <h1 className="font-display font-bold text-2xl text-gray-800 dark:text-white">{rt.createAccount}</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">{rt.joinRevolution}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{rt.fullName}</label>
               <div className="relative">
                 <HiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -69,7 +81,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{rt.email}</label>
               <div className="relative">
                 <HiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -84,7 +96,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{rt.password}</label>
               <div className="relative">
                 <HiLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -107,7 +119,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirm Password</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{rt.confirmPassword}</label>
               <div className="relative">
                 <HiLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -129,15 +141,15 @@ export default function Register() {
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                'Create Account'
+                rt.createBtn
               )}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-            Already have an account?{' '}
+            {rt.haveAccount}{' '}
             <Link to="/login" className="text-primary-600 dark:text-primary-400 font-semibold hover:underline">
-              Sign in
+              {rt.signIn}
             </Link>
           </p>
         </div>

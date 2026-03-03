@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import WeatherCard from '../components/WeatherCard';
@@ -6,6 +6,7 @@ import { HiSearch, HiExclamation, HiLightBulb, HiRefresh } from 'react-icons/hi'
 import { WiRain, WiDaySunny, WiCloudy, WiThunderstorm } from 'react-icons/wi';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import { useTranslation } from '../utils/useTranslation';
 
 const defaultWeatherData = {
   city: 'Vadodara',
@@ -67,6 +68,19 @@ export default function Weather() {
   const [forecastData, setForecastData] = useState([]);
   const [hourlyData, setHourlyData] = useState([]);
   const [source, setSource] = useState('');
+
+  const wStrings = useMemo(() => ({
+    title: 'Regional Weather Updates',
+    subtitle: 'Real-time weather data with farming-specific insights',
+    searchPlaceholder: 'Search city... (e.g., Ahmedabad, Mumbai)',
+    search: 'Search', refresh: 'Refresh',
+    farmingInsight: 'Farming Insight',
+    irrigationSuggestion: 'Irrigation Suggestion',
+    irrigationText: 'Best time to irrigate: Early morning (6-8 AM) — Low evaporation rate with current humidity levels.',
+    forecast7Day: '7-Day Forecast', weatherAlerts: 'Weather Alerts',
+    basedOn: 'Based on current conditions for',
+  }), []);
+  const { t: wt } = useTranslation(wStrings);
 
   const fetchWeather = async (targetCity) => {
     setLoading(true);
@@ -160,8 +174,8 @@ export default function Weather() {
       <div className="section-container">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <h1 className="section-title">🌤️ Regional Weather Updates</h1>
-          <p className="section-subtitle">Real-time weather data with farming-specific insights</p>
+          <h1 className="section-title">🌤️ {wt.title}</h1>
+          <p className="section-subtitle">{wt.subtitle}</p>
         </motion.div>
 
         {/* Search Bar */}
@@ -171,13 +185,13 @@ export default function Weather() {
               <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search city... (e.g., Ahmedabad, Mumbai)"
+                placeholder={wt.searchPlaceholder}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="input-field pl-12"
               />
             </div>
-            <button type="submit" className="btn-primary whitespace-nowrap">Search</button>
+            <button type="submit" className="btn-primary whitespace-nowrap">{wt.search}</button>
           </form>
           <div className="flex flex-wrap gap-2 mt-3">
             {cities.slice(0, 6).map((c) => (
@@ -218,7 +232,7 @@ export default function Weather() {
                   <span className="text-xs text-gray-400">for {city}</span>
                 </div>
                 <button onClick={() => fetchWeather(city)} className="text-xs flex items-center gap-1 text-primary-500 hover:text-primary-700 transition">
-                  <HiRefresh className="w-4 h-4" /> Refresh
+                  <HiRefresh className="w-4 h-4" /> {wt.refresh}
                 </button>
               </div>
             )}
@@ -233,19 +247,19 @@ export default function Weather() {
                 <div className="glass-card p-6 h-full flex flex-col">
                   <h3 className="font-display font-semibold text-lg mb-4 flex items-center gap-2">
                     <HiLightBulb className="w-5 h-5 text-yellow-500" />
-                    Farming Insight
+                    {wt.farmingInsight}
                   </h3>
                   <div className="flex-1 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/10 dark:to-orange-900/10 rounded-xl p-5 border border-yellow-200/50 dark:border-yellow-800/30">
                     <p className="text-lg font-medium text-gray-800 dark:text-gray-200 leading-relaxed">
                       {weatherData.farmingInsight}
                     </p>
-                    <p className="text-sm text-gray-500 mt-3">Based on current conditions for {city}</p>
+                    <p className="text-sm text-gray-500 mt-3">{wt.basedOn} {city}</p>
                   </div>
 
                   <div className="mt-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl">
-                    <h4 className="text-sm font-semibold text-primary-700 dark:text-primary-400 mb-1">💧 Irrigation Suggestion</h4>
+                    <h4 className="text-sm font-semibold text-primary-700 dark:text-primary-400 mb-1">💧 {wt.irrigationSuggestion}</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Best time to irrigate: <strong>Early morning (6-8 AM)</strong> — Low evaporation rate with current humidity levels.
+                      {wt.irrigationText}
                     </p>
                   </div>
                 </div>
@@ -259,7 +273,7 @@ export default function Weather() {
               transition={{ delay: 0.2 }}
               className="glass-card p-6 mb-10"
             >
-              <h3 className="font-display font-semibold text-lg mb-6">📅 7-Day Forecast</h3>
+              <h3 className="font-display font-semibold text-lg mb-6">📅 {wt.forecast7Day}</h3>
 
               {/* Day icons */}
               <div className="grid grid-cols-7 gap-2 mb-6">
@@ -313,7 +327,7 @@ export default function Weather() {
             >
               <h3 className="font-display font-semibold text-lg mb-4 flex items-center gap-2">
                 <HiExclamation className="w-5 h-5 text-orange-500" />
-                Weather Alerts
+                {wt.weatherAlerts}
               </h3>
               <div className="space-y-3">
                 {weatherAlerts.map((alert, i) => {
