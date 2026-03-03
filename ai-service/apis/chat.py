@@ -13,11 +13,10 @@ import json
 
 router = APIRouter()
 
-# ── Initialise once at startup (not per request) ──
+
 _llm = get_llm()
 _checkpointer = get_checkpointer()
 
-# ── Geocoding cache: (lat, lon) → address string ──
 _geocode_cache: dict[tuple[float, float], str] = {}
 
 
@@ -93,16 +92,16 @@ async def respond(request: RequestQuery):
                 if mode == "messages":
                     token = chunk[0]
 
-                    # ── AI Message: text or tool call ──
+                   
                     if isinstance(token, AIMessage):
-                        # Tool call initiated
+                  
                         if token.tool_calls:
                             name = token.tool_calls[-1].get("name")
                             if name:
                                 payload = {"type": "tool", "data": name}
                                 yield f"event: tool\ndata: {json.dumps(payload)}\n\n"
 
-                        # Text content (only when NOT a tool call chunk)
+                     
                         if not token.tool_calls and hasattr(token, "text") and token.text:
                             payload = {"type": "text", "data": token.text}
                             yield f"event: text\ndata: {json.dumps(payload)}\n\n"

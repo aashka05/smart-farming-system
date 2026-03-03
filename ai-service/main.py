@@ -5,9 +5,11 @@ Run with:
     uvicorn main:app --reload --port 8000
 """
 
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from apis.chat import router as chat_router
+from apis.crop import router as crop_router
 
 app = FastAPI(
     title="Agronex — Smart Farming AI",
@@ -15,7 +17,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Allow the React frontend (and Node server) to call this service
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,8 +26,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount the chat routes
+
 app.include_router(chat_router, prefix="/chat", tags=["Chat"])
+app.include_router(crop_router, prefix="/api/crop", tags=["Crop Recommendation"])
 
 
 @app.get("/")
@@ -36,5 +39,6 @@ async def root():
         "endpoints": {
             "health": "/chat/",
             "query": "POST /chat/query",
+            "recommend": "POST /api/crop/recommend",
         },
     }

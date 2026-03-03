@@ -1,3 +1,4 @@
+///PLEASE ADD PROTECTED ROUTER TO THIS PAGE AGAIN , IT WAS REMOVED FOR TESTING.
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiPaperAirplane, HiLightBulb } from 'react-icons/hi';

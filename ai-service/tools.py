@@ -15,9 +15,6 @@ from typing import Optional
 from langchain_core.tools import tool
 from serpapi import GoogleSearch
 
-# ────────────────────────────────────────────────────────────
-# Lazy-loaded district crop lookup (built from area-production.xlsx)
-# ────────────────────────────────────────────────────────────
 _crop_lookup = None
 
 def _load_crop_lookup():
