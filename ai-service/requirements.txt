@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+httpx
+joblib
+numpy
+pandas
+pydantic
+python-dotenv
+pymongo
+geopy
+google-search-results
+langchain
+langchain-core
+langchain-ollama
+langgraph
+langgraph-checkpoint-mongodb
