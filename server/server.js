@@ -34,6 +34,7 @@ app.use('/api/tutorials', require('./routes/tutorialRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/weather-station', require('./routes/weatherStationRoutes'));
 app.use('/api/station', require('./routes/weatherStationRoutes'));
+app.use('/api/translate', require('./routes/translateRoutes'));
 
 // --------------- Health Check ---------------
 app.get('/api/health', (req, res) => {

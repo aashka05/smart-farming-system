@@ -13,8 +13,7 @@ import DiseaseInfo from './pages/DiseaseInfo';
 import CropRecommendation from './pages/CropRecommendation';
 import MarketPrices from './pages/MarketPrices';
 import Tutorials from './pages/Tutorials';
-import About from './pages/About';
-import Contact from './pages/Contact';
+import AboutContact from './pages/AboutContact';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -93,8 +92,7 @@ function App() {
               <Route path="/crop-recommendation" element={<CropRecommendation />} />
               <Route path="/market-prices" element={<MarketPrices />} />
               <Route path="/tutorials" element={<Tutorials />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
+              <Route path="/about-contact" element={<AboutContact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 

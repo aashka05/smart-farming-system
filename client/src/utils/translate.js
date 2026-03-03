@@ -1,17 +1,19 @@
-export const translateText = async (text, target) => {
-  const res = await fetch("https://libretranslate.de/translate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      q: text,
-      source: "en",
-      target: target,
-      format: "text"
-    })
-  });
+import api from '../services/api';
 
-  const data = await res.json();
-  return data.translatedText;
+/**
+ * Translate text via the backend /api/translate proxy.
+ * Falls back to returning the original text on failure.
+ */
+export const translateText = async (text, target) => {
+  if (!text || target === 'en') return text;
+
+  try {
+    console.log('[translate] Calling POST /api/translate', { target, textLength: text.length });
+    const { data } = await api.post('/translate', { text, target });
+    console.log('[translate] Response received:', { translatedLength: data.translatedText?.length, error: data.error });
+    return data.translatedText || text;
+  } catch (err) {
+    console.error('[translate] Error:', err.message);
+    return text;
+  }
 };

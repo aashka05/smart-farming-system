@@ -74,4 +74,32 @@ function getMockCrops() {
   ];
 }
 
-module.exports = { getCrops, getCropById, getRecommendation };
+// @desc    Get disease info for a crop (restricted to Rice, Wheat, Cotton)
+// @route   GET /api/crops/diseases/:cropName
+// @access  Public
+const getCropDiseases = async (req, res) => {
+  try {
+    const { cropName } = req.params;
+    const allowedCrops = ['Rice', 'Wheat', 'Cotton'];
+
+    if (!allowedCrops.includes(cropName)) {
+      return res.status(400).json({
+        message: `Disease info is only available for: ${allowedCrops.join(', ')}`,
+      });
+    }
+
+    // Try DB first, then return success so frontend uses local JSON
+    try {
+      const crop = await Crop.findOne({ name: cropName });
+      if (crop && crop.diseases && crop.diseases.length > 0) {
+        return res.json({ crop: cropName, diseases: crop.diseases });
+      }
+    } catch (_) { /* DB may not be connected */ }
+
+    res.json({ crop: cropName, diseases: [], source: 'use-local' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching disease info', error: error.message });
+  }
+};
+
+module.exports = { getCrops, getCropById, getRecommendation, getCropDiseases };

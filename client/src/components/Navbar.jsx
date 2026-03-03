@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
+import { useTranslation } from "../utils/useTranslation";
 import {
   HiMenu,
   HiX,
@@ -14,7 +16,6 @@ import {
   HiChartBar,
   HiAcademicCap,
   HiInformationCircle,
-  HiPhone,
   HiGlobe,
 } from "react-icons/hi";
 import { GiPlantSeed } from "react-icons/gi";
@@ -26,21 +27,33 @@ const navLinks = [
   { to: "/crop-recommendation", label: "Crops", icon: GiPlantSeed },
   { to: "/market-prices", label: "Market", icon: HiChartBar },
   { to: "/tutorials", label: "Tutorials", icon: HiAcademicCap },
-  { to: "/about", label: "About", icon: HiInformationCircle },
-  { to: "/contact", label: "Contact", icon: HiPhone },
+  { to: "/about-contact", label: "About Us", icon: HiInformationCircle },
 ];
 
 const languages = [
-  { code: "en", label: "EN" },
-  { code: "hi", label: "HI" },
-  { code: "gu", label: "GU" },
+  { code: "en", label: "English" },
+  { code: "hi", label: "Hindi" },
+  { code: "gu", label: "Gujarati" },
 ];
 
 export default function Navbar({ darkMode, setDarkMode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [lang, setLang] = useState("en");
+  const { language, setLanguage } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+
+  const navStrings = useMemo(() => ({
+    home: 'Home', weather: 'Weather', disease: 'Disease',
+    crops: 'Crops', market: 'Market', tutorials: 'Tutorials',
+    aboutUs: 'About Us', login: 'Login',
+  }), []);
+  const { t } = useTranslation(navStrings);
+
+  const labelMap = {
+    '/': t.home, '/weather': t.weather, '/disease-info': t.disease,
+    '/crop-recommendation': t.crops, '/market-prices': t.market,
+    '/tutorials': t.tutorials, '/about-contact': t.aboutUs,
+  };
 
   const handleLogout = () => {
     logout();
@@ -82,7 +95,7 @@ export default function Navbar({ darkMode, setDarkMode }) {
                     }`
                   }
                 >
-                  {link.label}
+                  {labelMap[link.to] || link.label}
                 </NavLink>
               ))}
             </div>
@@ -90,14 +103,10 @@ export default function Navbar({ darkMode, setDarkMode }) {
 
           {/* Right Side Tools */}
           <div className="flex items-center gap-1 sm:gap-3 shrink-0">
-            {/* Language dropdown - Compact */}
+            {/* Language dropdown */}
             <select
-              value={lang}
-              onChange={(e) => {
-                const selectedLang = e.target.value;
-                setLang(selectedLang);
-                localStorage.setItem("lang", selectedLang);
-              }}
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
               className="hidden sm:block text-xs bg-gray-50 dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-md px-1 py-1 cursor-pointer focus:outline-none"
             >
               {languages.map((l) => (
@@ -144,7 +153,7 @@ export default function Navbar({ darkMode, setDarkMode }) {
                   to="/login"
                   className="px-5 py-2 text-sm font-semibold bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all shadow-sm"
                 >
-                  Login
+                  {t.login}
                 </Link>
               )}
             </div>
@@ -182,17 +191,29 @@ export default function Navbar({ darkMode, setDarkMode }) {
                 }
               >
                 <link.icon className="w-5 h-5" />
-                {link.label}
+                {labelMap[link.to] || link.label}
               </NavLink>
             ))}
-            <div className="pt-4 border-t border-gray-100 dark:border-dark-border">
+            <div className="pt-4 border-t border-gray-100 dark:border-dark-border space-y-3">
+              {/* Mobile language selector */}
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full text-sm bg-gray-50 dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 cursor-pointer focus:outline-none"
+              >
+                {languages.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
               {!isAuthenticated && (
                 <Link
                   to="/login"
                   onClick={() => setMobileOpen(false)}
                   className="block w-full text-center py-3 bg-primary-600 text-white rounded-xl font-bold"
                 >
-                  Login
+                  {t.login}
                 </Link>
               )}
             </div>

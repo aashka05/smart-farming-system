@@ -1,15 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiSearch, HiChevronDown, HiChevronUp, HiShieldCheck, HiBeaker, HiEye, HiLightBulb } from 'react-icons/hi';
 import CropCard from '../components/CropCard';
 import diseasesData from '../data/diseases.json';
+import { useTranslation } from '../utils/useTranslation';
 
 const crops = [
   { name: 'Rice', image: '🌾', season: 'Kharif' },
   { name: 'Wheat', image: '🌿', season: 'Rabi' },
   { name: 'Cotton', image: '☁️', season: 'Kharif' },
-  { name: 'Maize', image: '🌽', season: 'Kharif' },
-  { name: 'Sugarcane', image: '🎋', season: 'Kharif' },
 ];
 
 const AccordionItem = ({ title, icon, children, color }) => {
@@ -64,6 +63,17 @@ export default function DiseaseInfo() {
   const [selectedCrop, setSelectedCrop] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const dStrings = useMemo(() => ({
+    title: 'Plant Disease Information',
+    subtitle: 'Select a crop to view common diseases, symptoms, remedies, and prevention tips',
+    searchPlaceholder: 'Search crops...',
+    symptoms: 'Symptoms', causes: 'Causes', remedies: 'Remedies', prevention: 'Prevention',
+    season: 'Season', knownDiseases: 'known diseases documented below',
+    noData: 'No disease data available for',
+    selectCrop: 'Select a crop above to view disease information',
+  }), []);
+  const { t: dt } = useTranslation(dStrings);
+
   const filteredCrops = crops.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -75,9 +85,9 @@ export default function DiseaseInfo() {
       <div className="section-container">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <h1 className="section-title">🔬 Plant Disease Information</h1>
+          <h1 className="section-title">🔬 {dt.title}</h1>
           <p className="section-subtitle">
-            Select a crop to view common diseases, symptoms, remedies, and prevention tips
+            {dt.subtitle}
           </p>
         </motion.div>
 
@@ -87,7 +97,7 @@ export default function DiseaseInfo() {
             <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search crops..."
+              placeholder={dt.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="input-field pl-12"
@@ -96,14 +106,15 @@ export default function DiseaseInfo() {
         </div>
 
         {/* Crop Selection */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-10">
           {filteredCrops.map((crop) => (
-            <CropCard
-              key={crop.name}
-              crop={crop}
-              onClick={() => setSelectedCrop(crop)}
-              isSelected={selectedCrop?.name === crop.name}
-            />
+            <div key={crop.name} className="w-full sm:w-44">
+              <CropCard
+                crop={crop}
+                onClick={() => setSelectedCrop(crop)}
+                isSelected={selectedCrop?.name === crop.name}
+              />
+            </div>
           ))}
         </div>
 
@@ -120,11 +131,11 @@ export default function DiseaseInfo() {
                 <span className="text-4xl">{selectedCrop.image}</span>
                 <div>
                   <h2 className="text-2xl font-display font-bold text-gray-800 dark:text-white">{selectedCrop.name}</h2>
-                  <span className="badge-green text-xs">{selectedCrop.season} Season</span>
+                  <span className="badge-green text-xs">{selectedCrop.season} {dt.season}</span>
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
-                {diseases.length} known disease{diseases.length !== 1 ? 's' : ''} documented below
+                {diseases.length} {dt.knownDiseases}
               </p>
             </div>
 
@@ -140,7 +151,7 @@ export default function DiseaseInfo() {
                     </h3>
 
                     <div className="space-y-3">
-                      <AccordionItem title="Symptoms" icon={<HiEye className="w-4 h-4" />} color="red">
+                      <AccordionItem title={dt.symptoms} icon={<HiEye className="w-4 h-4" />} color="red">
                         <ul className="space-y-2">
                           {disease.symptoms.map((s, i) => (
                             <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
@@ -150,7 +161,7 @@ export default function DiseaseInfo() {
                         </ul>
                       </AccordionItem>
 
-                      <AccordionItem title="Causes" icon={<HiBeaker className="w-4 h-4" />} color="yellow">
+                      <AccordionItem title={dt.causes} icon={<HiBeaker className="w-4 h-4" />} color="yellow">
                         <ul className="space-y-2">
                           {disease.causes.map((c, i) => (
                             <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
@@ -160,7 +171,7 @@ export default function DiseaseInfo() {
                         </ul>
                       </AccordionItem>
 
-                      <AccordionItem title="Remedies" icon={<HiLightBulb className="w-4 h-4" />} color="blue">
+                      <AccordionItem title={dt.remedies} icon={<HiLightBulb className="w-4 h-4" />} color="blue">
                         <ul className="space-y-2">
                           {disease.remedies.map((r, i) => (
                             <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
@@ -170,7 +181,7 @@ export default function DiseaseInfo() {
                         </ul>
                       </AccordionItem>
 
-                      <AccordionItem title="Prevention" icon={<HiShieldCheck className="w-4 h-4" />} color="green">
+                      <AccordionItem title={dt.prevention} icon={<HiShieldCheck className="w-4 h-4" />} color="green">
                         <ul className="space-y-2">
                           {disease.prevention.map((p, i) => (
                             <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
@@ -185,7 +196,7 @@ export default function DiseaseInfo() {
               </div>
             ) : (
               <div className="glass-card p-8 text-center">
-                <p className="text-gray-500">No disease data available for {selectedCrop.name} yet.</p>
+                <p className="text-gray-500">{dt.noData} {selectedCrop.name}.</p>
               </div>
             )}
           </motion.div>
@@ -193,7 +204,7 @@ export default function DiseaseInfo() {
           <div className="text-center py-16">
             <span className="text-6xl mb-4 block">🌿</span>
             <h3 className="text-xl font-display font-semibold text-gray-600 dark:text-gray-400">
-              Select a crop above to view disease information
+              {dt.selectCrop}
             </h3>
           </div>
         )}

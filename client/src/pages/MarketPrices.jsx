@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { HiSearch, HiFilter, HiTrendingUp, HiTrendingDown } from 'react-icons/hi';
+import { useTranslation } from '../utils/useTranslation';
 
 const mockData = [
   { crop: 'Rice', market: 'Ahmedabad APMC', state: 'Gujarat', district: 'Ahmedabad', minPrice: 1800, maxPrice: 2200, modalPrice: 2000 },
@@ -25,6 +26,18 @@ export default function MarketPrices() {
   const [districtFilter, setDistrictFilter] = useState('');
   const [cropFilter, setCropFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const mStrings = useMemo(() => ({
+    title: 'Market Prices', subtitle: 'Real-time crop prices from mandis across India',
+    filters: 'Filters', clearAll: 'Clear All', searchPlaceholder: 'Search...',
+    allStates: 'All States', allDistricts: 'All Districts', allCrops: 'All Crops',
+    showing: 'Showing', results: 'results',
+    crop: 'Crop', market: 'Market', state: 'State',
+    minPrice: 'Min Price', maxPrice: 'Max Price', modalPrice: 'Modal Price',
+    noResults: 'No matching results. Try different filters.',
+    disclaimer: 'Prices shown are mock data for demonstration. Will be replaced with live API data from government portals.',
+  }), []);
+  const { t: mt } = useTranslation(mStrings);
 
   const states = useMemo(() => [...new Set(mockData.map((d) => d.state))].sort(), []);
   const allCrops = useMemo(() => [...new Set(mockData.map((d) => d.crop))].sort(), []);
@@ -57,17 +70,17 @@ export default function MarketPrices() {
     <div className="min-h-screen bg-gradient-to-b from-yellow-50/30 to-white dark:from-dark-bg dark:to-dark-card">
       <div className="section-container">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <h1 className="section-title">📊 Market Prices</h1>
-          <p className="section-subtitle">Real-time crop prices from mandis across India</p>
+          <h1 className="section-title">📊 {mt.title}</h1>
+          <p className="section-subtitle">{mt.subtitle}</p>
         </motion.div>
 
         {/* Filters */}
         <div className="glass-card p-5 mb-8">
           <div className="flex items-center gap-2 mb-4">
             <HiFilter className="w-5 h-5 text-primary-500" />
-            <h3 className="font-semibold text-gray-800 dark:text-white">Filters</h3>
+            <h3 className="font-semibold text-gray-800 dark:text-white">{mt.filters}</h3>
             {(stateFilter || districtFilter || cropFilter || searchQuery) && (
-              <button onClick={clearFilters} className="ml-auto text-sm text-primary-600 hover:underline">Clear All</button>
+              <button onClick={clearFilters} className="ml-auto text-sm text-primary-600 hover:underline">{mt.clearAll}</button>
             )}
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -75,29 +88,29 @@ export default function MarketPrices() {
               <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder={mt.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="input-field pl-10 py-2.5 text-sm"
               />
             </div>
             <select value={stateFilter} onChange={(e) => { setStateFilter(e.target.value); setDistrictFilter(''); }} className="input-field py-2.5 text-sm">
-              <option value="">All States</option>
+              <option value="">{mt.allStates}</option>
               {states.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
             <select value={districtFilter} onChange={(e) => setDistrictFilter(e.target.value)} className="input-field py-2.5 text-sm">
-              <option value="">All Districts</option>
+              <option value="">{mt.allDistricts}</option>
               {districts.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
             <select value={cropFilter} onChange={(e) => setCropFilter(e.target.value)} className="input-field py-2.5 text-sm">
-              <option value="">All Crops</option>
+              <option value="">{mt.allCrops}</option>
               {allCrops.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
         </div>
 
         {/* Results Count */}
-        <p className="text-sm text-gray-500 mb-4">Showing {filteredData.length} results</p>
+        <p className="text-sm text-gray-500 mb-4">{mt.showing} {filteredData.length} {mt.results}</p>
 
         {/* Table */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
@@ -106,12 +119,12 @@ export default function MarketPrices() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-primary-50 dark:bg-primary-900/20">
-                    <th className="text-left py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">Crop</th>
-                    <th className="text-left py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">Market</th>
-                    <th className="text-left py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">State</th>
-                    <th className="text-right py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">Min Price</th>
-                    <th className="text-right py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">Max Price</th>
-                    <th className="text-right py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">Modal Price</th>
+                    <th className="text-left py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">{mt.crop}</th>
+                    <th className="text-left py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">{mt.market}</th>
+                    <th className="text-left py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">{mt.state}</th>
+                    <th className="text-right py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">{mt.minPrice}</th>
+                    <th className="text-right py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">{mt.maxPrice}</th>
+                    <th className="text-right py-4 px-5 font-semibold text-gray-700 dark:text-gray-300">{mt.modalPrice}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
@@ -134,7 +147,7 @@ export default function MarketPrices() {
             {filteredData.length === 0 && (
               <div className="text-center py-12">
                 <span className="text-4xl mb-3 block">🔍</span>
-                <p className="text-gray-500">No matching results. Try different filters.</p>
+                <p className="text-gray-500">{mt.noResults}</p>
               </div>
             )}
           </div>
@@ -142,7 +155,7 @@ export default function MarketPrices() {
 
         {/* Disclaimer */}
         <p className="text-xs text-gray-400 mt-4 text-center">
-          ℹ️ Prices shown are mock data for demonstration. Will be replaced with live API data from government portals.
+          ℹ️ {mt.disclaimer}
         </p>
       </div>
     </div>

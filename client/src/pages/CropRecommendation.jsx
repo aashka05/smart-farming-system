@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { HiLightBulb, HiChartBar, HiCheckCircle } from 'react-icons/hi';
+import { useTranslation } from '../utils/useTranslation';
 
 const soilTypes = ['Alluvial', 'Black', 'Red', 'Laterite', 'Sandy', 'Clay'];
 const seasons = ['Kharif', 'Rabi', 'Zaid'];
@@ -35,6 +36,21 @@ export default function CropRecommendation() {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const cStrings = useMemo(() => ({
+    title: 'Crop Recommendation',
+    subtitle: 'Enter your soil and weather conditions to get AI-powered crop suggestions',
+    enterConditions: 'Enter Farming Conditions',
+    soilType: 'Soil Type', selectSoil: 'Select Soil Type',
+    seasonLabel: 'Season', selectSeason: 'Select Season',
+    avgRainfall: 'Average Rainfall (mm)', avgTemp: 'Average Temperature (°C)',
+    predicting: 'Predicting...', predictBtn: 'Predict Best Crops',
+    topCrops: 'Top 3 Recommended Crops', match: 'match',
+    disclaimer: 'Recommendations are based on mock prediction logic. Will be replaced with ML model for higher accuracy.',
+    enterYour: 'Enter Your Conditions',
+    fillForm: 'Fill in the form and click "Predict" to get personalized crop recommendations',
+  }), []);
+  const { t: ct } = useTranslation(cStrings);
+
   const handlePredict = (e) => {
     e.preventDefault();
     if (!soilType || !season) return;
@@ -60,9 +76,9 @@ export default function CropRecommendation() {
     <div className="min-h-screen bg-gradient-to-b from-green-50/50 to-white dark:from-dark-bg dark:to-dark-card">
       <div className="section-container">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <h1 className="section-title">🌱 Crop Recommendation</h1>
+          <h1 className="section-title">🌱 {ct.title}</h1>
           <p className="section-subtitle">
-            Enter your soil and weather conditions to get AI-powered crop suggestions
+            {ct.subtitle}
           </p>
         </motion.div>
 
@@ -72,18 +88,18 @@ export default function CropRecommendation() {
             <div className="glass-card p-6">
               <h3 className="font-display font-semibold text-lg mb-6 flex items-center gap-2">
                 <HiLightBulb className="w-5 h-5 text-yellow-500" />
-                Enter Farming Conditions
+                {ct.enterConditions}
               </h3>
               <form onSubmit={handlePredict} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Soil Type *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{ct.soilType} *</label>
                   <select
                     value={soilType}
                     onChange={(e) => setSoilType(e.target.value)}
                     className="input-field"
                     required
                   >
-                    <option value="">Select Soil Type</option>
+                    <option value="">{ct.selectSoil}</option>
                     {soilTypes.map((s) => (
                       <option key={s} value={s}>{s}</option>
                     ))}
@@ -91,14 +107,14 @@ export default function CropRecommendation() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Season *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{ct.seasonLabel} *</label>
                   <select
                     value={season}
                     onChange={(e) => setSeason(e.target.value)}
                     className="input-field"
                     required
                   >
-                    <option value="">Select Season</option>
+                    <option value="">{ct.selectSeason}</option>
                     {seasons.map((s) => (
                       <option key={s} value={s}>{s}</option>
                     ))}
@@ -106,7 +122,7 @@ export default function CropRecommendation() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Average Rainfall (mm)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{ct.avgRainfall}</label>
                   <input
                     type="number"
                     value={rainfall}
@@ -117,7 +133,7 @@ export default function CropRecommendation() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Average Temperature (°C)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{ct.avgTemp}</label>
                   <input
                     type="number"
                     value={temperature}
@@ -135,12 +151,12 @@ export default function CropRecommendation() {
                   {loading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Predicting...
+                      {ct.predicting}
                     </>
                   ) : (
                     <>
                       <HiChartBar className="w-5 h-5" />
-                      Predict Best Crops
+                      {ct.predictBtn}
                     </>
                   )}
                 </button>
@@ -154,7 +170,7 @@ export default function CropRecommendation() {
               <div className="space-y-4">
                 <h3 className="font-display font-semibold text-lg flex items-center gap-2">
                   <HiCheckCircle className="w-5 h-5 text-primary-500" />
-                  Top 3 Recommended Crops
+                  {ct.topCrops}
                 </h3>
                 {results.map((r, idx) => (
                   <motion.div
@@ -172,7 +188,7 @@ export default function CropRecommendation() {
                         <h4 className="font-display font-bold text-xl text-gray-800 dark:text-white">{r.crop}</h4>
                       </div>
                       <span className={`badge ${r.confidence >= 85 ? 'badge-green' : r.confidence >= 70 ? 'badge-yellow' : 'badge-red'}`}>
-                        {r.confidence}% match
+                        {r.confidence}% {ct.match}
                       </span>
                     </div>
 
@@ -201,10 +217,10 @@ export default function CropRecommendation() {
               <div className="glass-card p-12 text-center h-full flex flex-col items-center justify-center">
                 <span className="text-6xl mb-4">🌾</span>
                 <h3 className="text-xl font-display font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                  Enter Your Conditions
+                  {ct.enterYour}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-500">
-                  Fill in the form and click "Predict" to get personalized crop recommendations
+                  {ct.fillForm}
                 </p>
               </div>
             )}

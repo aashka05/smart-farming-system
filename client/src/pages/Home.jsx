@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -9,6 +9,7 @@ import {
 import FeatureCard from '../components/FeatureCard';
 import HeroVisual from '../components/HeroVisual';
 import IntroAnimation from '../components/IntroAnimation';
+import { useTranslation } from '../utils/useTranslation';
 
 const features = [
   { icon: '🌤️', title: 'Weather Forecast', description: 'Real-time weather updates with farming-specific insights and alerts for your region.' },
@@ -40,6 +41,44 @@ const steps = [
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+
+  const strings = useMemo(() => ({
+    heroLine1: 'AI Powered', heroLine2: 'Smart Farming', heroLine3: 'Platform',
+    heroDesc: "Farming shouldn't depend on guesswork. Our platform helps farmers predict weather changes, detect crop diseases early, and make better market decisions using simple AI-powered tools.",
+    getStarted: 'Get Started', learnMore: 'Learn More',
+    freeToUse: 'Free to Use', aiPowered: 'AI Powered', forFarmers: 'For Indian Farmers',
+    problemTitle: 'The Problem We Solve',
+    problemSubtitle: 'Indian farmers face critical challenges that can be solved with technology',
+    solutionsTitle: 'Our Solutions',
+    prob0t: 'Unpredictable Weather', prob0d: 'Sudden weather changes destroy crops and reduce yield without timely warnings.',
+    prob1t: 'Crop Diseases', prob1d: 'Late identification of diseases causes massive crop losses every season.',
+    prob2t: 'Market Price Uncertainty', prob2d: 'Farmers sell at low prices due to lack of real-time market information.',
+    sol0t: 'Weather Alerts', sol0d: 'Get real-time weather notifications with farming-specific action recommendations.',
+    sol1t: 'AI Farming Assistant', sol1d: 'AI chatbot that answers farming questions and provides expert guidance 24/7.',
+    sol2t: 'Crop Recommendation', sol2d: 'Data-driven crop suggestions that match your soil, weather, and market conditions.',
+    sol3t: 'Market Insights', sol3d: 'Live mandi prices with trends so you can sell crops at the best time and price.',
+    featTitle: 'Key Features', featSubtitle: 'Everything a modern farmer needs, powered by technology',
+    f0t: 'Weather Forecast', f0d: 'Real-time weather updates with farming-specific insights and alerts for your region.',
+    f1t: 'Crop Recommendation', f1d: 'AI-powered crop suggestions based on soil type, rainfall, temperature and season.',
+    f2t: 'Plant Disease Detection', f2d: 'Identify crop diseases from images with treatment recommendations and prevention tips.',
+    f3t: 'AI Farming Chatbot', f3d: 'Ask any farming question and get instant expert advice powered by artificial intelligence.',
+    f4t: 'Market Price Insights', f4d: 'Live market prices for crops across mandis with trend analysis and price alerts.',
+    f5t: 'Irrigation Advisory', f5d: 'Smart irrigation scheduling based on soil moisture, weather data and crop requirements.',
+    howTitle: 'How It Works', howSubtitle: 'Get started in three simple steps',
+    s0t: 'Register', s0d: 'Create your free account in seconds. No complexity.',
+    s1t: 'Ask Questions or View Insights', s1d: 'Browse weather, crop info, market prices, or ask our AI assistant.',
+    s2t: 'Improve Farming Decisions', s2d: 'Make data-driven decisions to increase yield and reduce losses.',
+    ctaTitle: 'Ready to Transform Your Farming?',
+    ctaDesc: 'Join thousands of smart farmers using AI-powered insights to increase yield, reduce losses, and make better decisions every day.',
+    ctaBtn1: 'Create Free Account', ctaBtn2: 'Try AI Chatbot',
+  }), []);
+
+  const { t } = useTranslation(strings);
+
+  const tProblems = problems.map((p, i) => ({ ...p, title: t[`prob${i}t`] || p.title, desc: t[`prob${i}d`] || p.desc }));
+  const tSolutions = solutions.map((s, i) => ({ ...s, title: t[`sol${i}t`] || s.title, desc: t[`sol${i}d`] || s.desc }));
+  const tFeatures = features.map((f, i) => ({ ...f, title: t[`f${i}t`] || f.title, description: t[`f${i}d`] || f.description }));
+  const tSteps = steps.map((s, i) => ({ ...s, title: t[`s${i}t`] || s.title, desc: t[`s${i}d`] || s.desc }));
 
   useEffect(() => {
     const hasVisited = sessionStorage.getItem('agro_intro_played');
@@ -86,30 +125,27 @@ export default function Home() {
               >
                   
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-extrabold leading-tight mb-6">
-                  <span className="gradient-text">AI Powered</span>
+                  <span className="gradient-text">{t.heroLine1}</span>
                   <br />
-                  Smart Farming
+                  {t.heroLine2}
                   <br />
-                  Platform
+                  {t.heroLine3}
                 </h1>
                 <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed max-w-lg">
-                  Farming shouldn't depend on guesswork. Our platform helps farmers{' '}
-                  <strong className="text-gray-800 dark:text-gray-200">predict weather changes</strong>,{' '}
-                  <strong className="text-gray-800 dark:text-gray-200">detect crop diseases early</strong>, and make{' '}
-                  <strong className="text-gray-800 dark:text-gray-200">better market decisions</strong> using simple AI-powered tools.
+                  {t.heroDesc}
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Link to="/register" className="btn-primary flex items-center gap-2">
-                    Get Started <HiArrowRight className="w-5 h-5" />
+                    {t.getStarted} <HiArrowRight className="w-5 h-5" />
                   </Link>
-                  <Link to="/about" className="btn-secondary">
-                    Learn More
+                  <Link to="/about-contact" className="btn-secondary">
+                    {t.learnMore}
                   </Link>
                 </div>
                 <div className="flex items-center gap-6 mt-10 text-sm text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center gap-2"><span className="text-primary-500">✓</span> Free to Use</div>
-                  <div className="flex items-center gap-2"><span className="text-primary-500">✓</span> AI Powered</div>
-                  <div className="flex items-center gap-2"><span className="text-primary-500">✓</span> For Indian Farmers</div>
+                  <div className="flex items-center gap-2"><span className="text-primary-500">✓</span> {t.freeToUse}</div>
+                  <div className="flex items-center gap-2"><span className="text-primary-500">✓</span> {t.aiPowered}</div>
+                  <div className="flex items-center gap-2"><span className="text-primary-500">✓</span> {t.forFarmers}</div>
                 </div>
               </motion.div>
 
@@ -128,21 +164,21 @@ export default function Home() {
 
         {/* ============ PROBLEM vs SOLUTION ============ */}
         <section className="section-container">
-          <h2 className="section-title">The <span className="gradient-text">Problem</span> We Solve</h2>
-          <p className="section-subtitle">Indian farmers face critical challenges that can be solved with technology</p>
+          <h2 className="section-title">{t.problemTitle}</h2>
+          <p className="section-subtitle">{t.problemSubtitle}</p>
           <div className="grid md:grid-cols-3 gap-6 mb-16">
-            {problems.map((p, i) => (
-              <motion.div key={p.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="glass-card p-6 border-l-4 border-red-400">
+            {tProblems.map((p, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="glass-card p-6 border-l-4 border-red-400">
                 <span className="text-3xl mb-3 block">{p.icon}</span>
                 <h3 className="font-display font-semibold text-lg mb-2">{p.title}</h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">{p.desc}</p>
               </motion.div>
             ))}
           </div>
-          <h3 className="text-2xl font-display font-bold text-center mb-8">Our <span className="gradient-text">Solutions</span></h3>
+          <h3 className="text-2xl font-display font-bold text-center mb-8">{t.solutionsTitle}</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {solutions.map((s, i) => (
-              <motion.div key={s.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="glass-card-hover p-6 border-l-4 border-primary-400">
+            {tSolutions.map((s, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="glass-card-hover p-6 border-l-4 border-primary-400">
                 <span className="text-3xl mb-3 block">{s.icon}</span>
                 <h3 className="font-display font-semibold mb-2">{s.title}</h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">{s.desc}</p>
@@ -154,11 +190,11 @@ export default function Home() {
         {/* ============ KEY FEATURES ============ */}
         <section className="bg-gradient-to-b from-gray-50 to-white dark:from-dark-card dark:to-dark-bg">
           <div className="section-container">
-            <h2 className="section-title">Key <span className="gradient-text">Features</span></h2>
-            <p className="section-subtitle">Everything a modern farmer needs, powered by technology</p>
+            <h2 className="section-title">{t.featTitle}</h2>
+            <p className="section-subtitle">{t.featSubtitle}</p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {features.map((f, i) => (
-                <FeatureCard key={f.title} icon={f.icon} title={f.title} description={f.description} delay={i * 0.08} />
+              {tFeatures.map((f, i) => (
+                <FeatureCard key={i} icon={f.icon} title={f.title} description={f.description} delay={i * 0.08} />
               ))}
             </div>
           </div>
@@ -166,10 +202,10 @@ export default function Home() {
 
         {/* ============ HOW IT WORKS ============ */}
         <section className="section-container">
-          <h2 className="section-title">How It <span className="gradient-text">Works</span></h2>
-          <p className="section-subtitle">Get started in three simple steps</p>
+          <h2 className="section-title">{t.howTitle}</h2>
+          <p className="section-subtitle">{t.howSubtitle}</p>
           <div className="grid md:grid-cols-3 gap-8">
-            {steps.map((s, i) => (
+            {tSteps.map((s, i) => (
               <motion.div key={s.step} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.15 }} className="text-center relative">
                 <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white mb-5 shadow-lg shadow-primary-500/30">
                   {s.icon}
@@ -189,16 +225,16 @@ export default function Home() {
         <section className="bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-800 dark:to-primary-900">
           <div className="section-container text-center text-white">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
-              <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Ready to Transform Your Farming?</h2>
+              <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">{t.ctaTitle}</h2>
               <p className="text-primary-100 text-lg max-w-2xl mx-auto mb-8">
-                Join thousands of smart farmers using AI-powered insights to increase yield, reduce losses, and make better decisions every day.
+                {t.ctaDesc}
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link to="/register" className="bg-white text-primary-700 font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
-                  Create Free Account
+                  {t.ctaBtn1}
                 </Link>
                 <Link to="/dashboard/chatbot" className="border-2 border-white/30 text-white font-semibold py-3 px-8 rounded-xl hover:bg-white/10 transition-all duration-300">
-                  Try AI Chatbot
+                  {t.ctaBtn2}
                 </Link>
               </div>
             </motion.div>

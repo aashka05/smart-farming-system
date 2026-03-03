@@ -1,4 +1,6 @@
 import { WiDaySunny, WiCloudy, WiRain, WiStrongWind, WiHumidity, WiThunderstorm, WiFog } from 'react-icons/wi';
+import { useMemo } from 'react';
+import { useTranslation } from '../utils/useTranslation';
 
 const conditionIcons = {
   sunny: <WiDaySunny className="w-16 h-16 text-yellow-400" />,
@@ -12,6 +14,11 @@ const conditionIcons = {
 
 export default function WeatherCard({ data }) {
   const icon = conditionIcons[data?.condition] || conditionIcons.sunny;
+
+  const wcStrings = useMemo(() => ({
+    humidity: 'Humidity', rain: 'Rain', wind: 'Wind',
+  }), []);
+  const { t: wc } = useTranslation(wcStrings);
 
   return (
     <div className="glass-card p-6 relative overflow-hidden">
@@ -33,17 +40,17 @@ export default function WeatherCard({ data }) {
       <div className="grid grid-cols-3 gap-4 text-center">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
           <WiHumidity className="w-6 h-6 text-blue-500 mx-auto" />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Humidity</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{wc.humidity}</p>
           <p className="font-semibold text-gray-800 dark:text-white">{data?.humidity || 65}%</p>
         </div>
         <div className="bg-cyan-50 dark:bg-cyan-900/20 rounded-xl p-3">
           <WiRain className="w-6 h-6 text-cyan-500 mx-auto" />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Rain</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{wc.rain}</p>
           <p className="font-semibold text-gray-800 dark:text-white">{data?.rainProbability || 40}%</p>
         </div>
         <div className="bg-teal-50 dark:bg-teal-900/20 rounded-xl p-3">
           <WiStrongWind className="w-6 h-6 text-teal-500 mx-auto" />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Wind</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{wc.wind}</p>
           <p className="font-semibold text-gray-800 dark:text-white">{data?.windSpeed || 12} km/h</p>
         </div>
       </div>
