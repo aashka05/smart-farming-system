@@ -1,13 +1,6 @@
 // src/components/HeroVisual.jsx
 import { motion } from 'framer-motion';
 
-const floatVariant = (delay = 0) => ({
-  animate: {
-    y: [0, -8, 0],
-    transition: { duration: 3, ease: 'easeInOut', repeat: Infinity, delay },
-  },
-});
-
 const cards = [
   {
     icon: '🌤️',
@@ -42,25 +35,50 @@ const cards = [
 export default function HeroVisual() {
   return (
     <div className="hero-visual" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: '100%', maxWidth: 520, aspectRatio: '1', position: 'relative' }}>
+      <div style={{ width: '100%', maxWidth: 520, aspectRatio: '1', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
-        {/* Background blob — matches .hbg */}
+        {/* --- CONCENTRIC RINGS (NEW: PERFECTLY ALIGNED) --- */}
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={`ring-${i}`}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ 
+              scale: [0.8, 1.4 + i * 0.2], 
+              opacity: [0, 0.2, 0] 
+            }}
+            transition={{ 
+              duration: 4, 
+              repeat: Infinity, 
+              delay: i * 1.3,
+              ease: "easeOut" 
+            }}
+            style={{
+              position: 'absolute',
+              width: '70%',
+              height: '70%',
+              border: '1.5px solid #22c55e',
+              borderRadius: '50%',
+              pointerEvents: 'none',
+              zIndex: 0,
+            }}
+          />
+        ))}
+
+        {/* Background blob */}
         <div style={{
-          position: 'absolute', top: '50%', left: '50%',
-          transform: 'translate(-50%,-50%)',
+          position: 'absolute',
           width: '85%', aspectRatio: '1',
           background: 'linear-gradient(135deg, #f0fdf4, #fef3c7)',
           borderRadius: '50%',
           zIndex: 0,
         }} />
 
-        {/* Central orb — matches .hmain */}
+        {/* Central orb */}
         <motion.div
           animate={{ y: [0, -12, 0] }}
           transition={{ duration: 4, ease: 'easeInOut', repeat: Infinity }}
           style={{
-            position: 'absolute', top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
+            position: 'absolute',
             width: '55%', aspectRatio: '1',
             background: 'linear-gradient(145deg, #4ade80, #14532d)',
             borderRadius: '50%',
@@ -73,7 +91,7 @@ export default function HeroVisual() {
           🌾
         </motion.div>
 
-        {/* Floating cards — matches .hfloat structure */}
+        {/* Floating cards */}
         {cards.map((card) => (
           <motion.div
             key={card.label}
@@ -93,26 +111,12 @@ export default function HeroVisual() {
               minWidth: 155,
             }}
           >
-            {/* Icon */}
             <span style={{ fontSize: '1.3rem' }}>{card.icon}</span>
-
-            {/* Text — matches .hft / .hfl / .hfv */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{
-                fontSize: '0.62rem',
-                color: '#9ca3af',
-                fontWeight: 500,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}>
+              <span style={{ fontSize: '0.62rem', color: '#9ca3af', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {card.label}
               </span>
-              <span style={{
-                fontFamily: "'Sora', sans-serif",
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                color: '#1a1a2e',
-              }}>
+              <span style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.82rem', fontWeight: 700, color: '#1a1a2e' }}>
                 {card.value}
               </span>
             </div>
@@ -127,8 +131,6 @@ export default function HeroVisual() {
           style={{
             position: 'absolute',
             bottom: '28%',
-            left: '50%',
-            transform: 'translateX(-50%)',
             zIndex: 3,
             display: 'flex',
             alignItems: 'center',
@@ -150,11 +152,7 @@ export default function HeroVisual() {
               display: 'inline-block',
             }}
           />
-          <span style={{
-            fontSize: '0.65rem', fontWeight: 700,
-            color: '#bbf7d0', letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-          }}>
+          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#bbf7d0', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
             Live · AI Active
           </span>
         </motion.div>
