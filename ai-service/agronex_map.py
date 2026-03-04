@@ -2,7 +2,10 @@
 agronex_map.py — Agronex India Map Crop Recommender
 Click anywhere on the India map to get Top 3 crop recommendations for that location.
 """
-
+#HOW TO USE THIS FILE 
+#-> run these commands 
+# pip install streamlit
+# streamlit run agronex_map.py 
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
@@ -382,4 +385,5 @@ with col_results:
             <div style="font-size:0.72rem; color:#aaa; margin-top:1rem;">
                 Data source: ICRISAT District-level Production Dataset (1997–2019)
             </div>
+
             """, unsafe_allow_html=True)
