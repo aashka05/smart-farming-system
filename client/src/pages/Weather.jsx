@@ -218,25 +218,6 @@ export default function Weather() {
           </div>
         ) : (
           <>
-            {/* Source Badge */}
-            {source && (
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                    source === 'station' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                    : source === 'open-meteo' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                  }`}>
-                    {source === 'station' ? '📡 Live Station' : source === 'open-meteo' ? '🌐 Open-Meteo API' : '🔶 Mock Data'}
-                  </span>
-                  <span className="text-xs text-gray-400">for {city}</span>
-                </div>
-                <button onClick={() => fetchWeather(city)} className="text-xs flex items-center gap-1 text-primary-500 hover:text-primary-700 transition">
-                  <HiRefresh className="w-4 h-4" /> {wt.refresh}
-                </button>
-              </div>
-            )}
-
             {/* Current Weather + Farming Insight */}
             <div className="grid md:grid-cols-2 gap-6 mb-10">
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>

@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { HiClock, HiBeaker } from 'react-icons/hi';
+import { useTranslation } from '../utils/useTranslation';
 
 const scheduleTemplate = [
   { time: '6:00 AM', duration: '30 min', zone: 'Zone A - Rice', type: 'Flood', status: 'scheduled' },
@@ -25,6 +26,26 @@ export default function IrrigationAdvisory() {
   const [weatherCondition, setWeatherCondition] = useState('partly-cloudy');
   const [schedule, setSchedule] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const irStrings = useMemo(() => ({
+    title: 'Irrigation Advisory',
+    subtitle: 'Smart irrigation scheduling based on soil moisture and weather conditions',
+    sensorInputs: 'Sensor Inputs',
+    soilMoisture: 'Soil Moisture (%)',
+    weatherCondition: 'Weather Condition',
+    generateSchedule: 'Generate Schedule',
+    weeklyWater: 'Weekly Water Usage (Liters)',
+    irrigationAdvisory: 'Irrigation Advisory',
+    totalWater: 'Total Water Needed',
+    waterSaved: 'Water Saved',
+    todaySchedule: "Today's Watering Schedule",
+    smartIrrigation: 'Smart Irrigation',
+    placeholderDesc: 'Adjust soil moisture and weather to get optimized irrigation schedule',
+    dry: 'Dry (0%)',
+    optimal: 'Optimal (50%)',
+    wet: 'Wet (100%)',
+  }), []);
+  const { t: it } = useTranslation(irStrings);
 
   const handleGenerate = (e) => {
     e.preventDefault();
@@ -77,8 +98,8 @@ export default function IrrigationAdvisory() {
     <div className="min-h-screen bg-gradient-to-b from-cyan-50/50 to-white dark:from-dark-bg dark:to-dark-card">
       <div className="section-container">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <h1 className="section-title">💧 Irrigation Advisory</h1>
-          <p className="section-subtitle">Smart irrigation scheduling based on soil moisture and weather conditions</p>
+          <h1 className="section-title">💧 {it.title}</h1>
+          <p className="section-subtitle">{it.subtitle}</p>
         </motion.div>
 
         <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8">
@@ -87,12 +108,12 @@ export default function IrrigationAdvisory() {
             <div className="glass-card p-6">
               <h3 className="font-display font-semibold text-lg mb-6 flex items-center gap-2">
                 <HiBeaker className="w-5 h-5 text-cyan-500" />
-                Sensor Inputs
+                {it.sensorInputs}
               </h3>
               <form onSubmit={handleGenerate} className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Soil Moisture (%) — <span className="text-primary-500 font-bold">{soilMoisture}%</span>
+                    {it.soilMoisture} — <span className="text-primary-500 font-bold">{soilMoisture}%</span>
                   </label>
                   <input
                     type="range"
@@ -103,14 +124,14 @@ export default function IrrigationAdvisory() {
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
                   />
                   <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>Dry (0%)</span>
-                    <span>Optimal (50%)</span>
-                    <span>Wet (100%)</span>
+                    <span>{it.dry}</span>
+                    <span>{it.optimal}</span>
+                    <span>{it.wet}</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Weather Condition</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{it.weatherCondition}</label>
                   <select value={weatherCondition} onChange={(e) => setWeatherCondition(e.target.value)} className="input-field">
                     <option value="sunny">☀️ Sunny</option>
                     <option value="partly-cloudy">⛅ Partly Cloudy</option>
@@ -129,7 +150,7 @@ export default function IrrigationAdvisory() {
                   ) : (
                     <>
                       <HiClock className="w-5 h-5" />
-                      Generate Schedule
+                      {it.generateSchedule}
                     </>
                   )}
                 </button>
@@ -138,7 +159,7 @@ export default function IrrigationAdvisory() {
 
             {/* Weekly Water Usage Chart */}
             <div className="glass-card p-6">
-              <h4 className="font-display font-semibold mb-4">📊 Weekly Water Usage (Liters)</h4>
+              <h4 className="font-display font-semibold mb-4">📊 {it.weeklyWater}</h4>
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={weeklyWater}>
@@ -159,18 +180,18 @@ export default function IrrigationAdvisory() {
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
                 {/* Advisory */}
                 <div className={`glass-card p-5 border-l-4 ${urgencyColors[schedule.urgency]}`}>
-                  <h4 className="font-semibold mb-1">🌊 Irrigation Advisory</h4>
+                  <h4 className="font-semibold mb-1">🌊 {it.irrigationAdvisory}</h4>
                   <p className="text-sm">{schedule.advice}</p>
                 </div>
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="glass-card p-4 text-center">
-                    <p className="text-sm text-gray-500">Total Water Needed</p>
+                    <p className="text-sm text-gray-500">{it.totalWater}</p>
                     <p className="text-2xl font-bold text-cyan-600">{schedule.totalWater}L</p>
                   </div>
                   <div className="glass-card p-4 text-center">
-                    <p className="text-sm text-gray-500">Water Saved</p>
+                    <p className="text-sm text-gray-500">{it.waterSaved}</p>
                     <p className="text-2xl font-bold text-green-600">{schedule.savedWater}L</p>
                   </div>
                 </div>
@@ -179,7 +200,7 @@ export default function IrrigationAdvisory() {
                 <div className="glass-card p-5">
                   <h4 className="font-display font-semibold mb-4 flex items-center gap-2">
                     <HiClock className="w-5 h-5 text-primary-500" />
-                    Today's Watering Schedule
+                    {it.todaySchedule}
                   </h4>
                   <div className="space-y-3">
                     {schedule.items.map((item, i) => (
@@ -206,9 +227,9 @@ export default function IrrigationAdvisory() {
               <div className="glass-card p-12 text-center h-full flex flex-col items-center justify-center">
                 <span className="text-6xl mb-4">💧</span>
                 <h3 className="font-display font-semibold text-xl text-gray-600 dark:text-gray-400 mb-2">
-                  Smart Irrigation
+                  {it.smartIrrigation}
                 </h3>
-                <p className="text-sm text-gray-500">Adjust soil moisture and weather to get optimized irrigation schedule</p>
+                <p className="text-sm text-gray-500">{it.placeholderDesc}</p>
               </div>
             )}
           </div>

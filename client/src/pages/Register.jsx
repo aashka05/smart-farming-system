@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { HiUser, HiMail, HiLockClosed, HiEye, HiEyeOff } from 'react-icons/hi';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { useTranslation } from '../utils/useTranslation';
@@ -13,12 +14,12 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const rStrings = useMemo(() => ({
     createAccount: 'Create Account',
-    joinRevolution: 'Join the smart farming revolution',
+    joinRevolution: 'Join the FarmLytics revolution',
     fullName: 'Full Name', email: 'Email',
     password: 'Password', confirmPassword: 'Confirm Password',
     createBtn: 'Create Account',
@@ -26,6 +27,16 @@ export default function Register() {
     signIn: 'Sign in',
   }), []);
   const { t: rt } = useTranslation(rStrings);
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await googleLogin(credentialResponse.credential);
+      toast.success('Account created successfully! Welcome to FarmLytics 🌾');
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Google sign-up failed.');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,7 +51,7 @@ export default function Register() {
     setLoading(true);
     try {
       await register(name, email, password);
-      toast.success('Account created successfully! Welcome to SmartFarm 🌾');
+      toast.success('Account created successfully! Welcome to FarmLytics 🌾');
       navigate('/dashboard');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
@@ -145,6 +156,22 @@ export default function Register() {
               )}
             </button>
           </form>
+
+          {/* Google OAuth Divider */}
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-dark-border" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-dark-border" />
+          </div>
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error('Google sign-up was unsuccessful. Please try again.')}
+              text="signup_with"
+              shape="rectangular"
+              width="100%"
+            />
+          </div>
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
             {rt.haveAccount}{' '}

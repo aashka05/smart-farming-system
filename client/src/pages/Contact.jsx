@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { HiMail, HiPhone, HiLocationMarker, HiChat, HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import toast from 'react-hot-toast';
+import api from '../services/api';
 
 const faqs = [
-  { q: 'Is the platform free to use?', a: 'Yes! The Smart Farming Platform is completely free for all farmers. We believe technology should be accessible to every farmer regardless of their financial situation.' },
+  { q: 'Is the platform free to use?', a: 'Yes! FarmLytics is completely free for all farmers. We believe technology should be accessible to every farmer regardless of their financial situation.' },
   { q: 'How accurate are the crop recommendations?', a: 'Our recommendations are based on agricultural research data and will be enhanced with ML models. Currently using validated agricultural practices for suggestions.' },
   { q: 'Can I use the platform in my local language?', a: 'Yes, we support English, Hindi (हिन्दी), and Gujarati (ગુજરાતી). More regional languages will be added soon.' },
   { q: 'How does the weather station integration work?', a: 'We support IoT weather stations using PIC18F16Q41 microcontroller with GSM modem. The station sends sensor data (temperature, humidity, soil moisture, etc.) in JSON format to our API endpoint.' },
@@ -17,14 +18,18 @@ export default function Contact() {
   const [loading, setLoading] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await api.post('/contact', formData);
       toast.success('Message sent successfully! We will get back to you soon.');
       setFormData({ name: '', email: '', message: '' });
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to send message. Please try again.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -109,7 +114,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Email Support</p>
-                    <p className="font-semibold text-gray-800 dark:text-white">support@smartfarm.in</p>
+                    <p className="font-semibold text-gray-800 dark:text-white">support@farmlytics.in</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-3 bg-purple-50 dark:bg-purple-900/10 rounded-xl">
@@ -118,7 +123,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Office</p>
-                    <p className="font-semibold text-gray-800 dark:text-white text-sm">Smart Farming Lab, Agricultural University, India</p>
+                    <p className="font-semibold text-gray-800 dark:text-white text-sm">FarmLytics Lab, Agricultural University, India</p>
                   </div>
                 </div>
               </div>

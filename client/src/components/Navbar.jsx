@@ -17,10 +17,13 @@ import {
   HiAcademicCap,
   HiInformationCircle,
   HiGlobe,
+  HiChat,
+  HiChevronDown,
+  HiShieldCheck,
 } from "react-icons/hi";
-import { GiPlantSeed } from "react-icons/gi";
+import { GiPlantSeed, GiWateringCan } from "react-icons/gi";
 
-const navLinks = [
+const publicLinks = [
   { to: "/", label: "Home", icon: HiHome },
   { to: "/weather", label: "Weather", icon: HiCloud },
   { to: "/disease-info", label: "Disease", icon: HiBeaker },
@@ -28,6 +31,15 @@ const navLinks = [
   { to: "/market-prices", label: "Market", icon: HiChartBar },
   { to: "/tutorials", label: "Tutorials", icon: HiAcademicCap },
   { to: "/about-contact", label: "About Us", icon: HiInformationCircle },
+];
+
+const privateLinks = [
+  { to: "/dashboard/crop-health", label: "Disease Prediction", icon: HiShieldCheck },
+  { to: "/dashboard/irrigation", label: "Irrigation Advisory", icon: GiWateringCan },
+  { to: "/dashboard/chatbot", label: "AI Chatbot", icon: HiChat },
+  { to: "/weather", label: "Weather", icon: HiCloud },
+  { to: "/market-prices", label: "Market", icon: HiChartBar },
+  { to: "/tutorials", label: "Tutorials", icon: HiAcademicCap },
 ];
 
 const languages = [
@@ -38,6 +50,7 @@ const languages = [
 
 export default function Navbar({ darkMode, setDarkMode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const { language, setLanguage } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
@@ -46,6 +59,9 @@ export default function Navbar({ darkMode, setDarkMode }) {
     home: 'Home', weather: 'Weather', disease: 'Disease',
     crops: 'Crops', market: 'Market', tutorials: 'Tutorials',
     aboutUs: 'About Us', login: 'Login',
+    diseasePrediction: 'Disease Prediction',
+    irrigationAdvisory: 'Irrigation Advisory',
+    aiChatbot: 'AI Chatbot',
   }), []);
   const { t } = useTranslation(navStrings);
 
@@ -53,7 +69,12 @@ export default function Navbar({ darkMode, setDarkMode }) {
     '/': t.home, '/weather': t.weather, '/disease-info': t.disease,
     '/crop-recommendation': t.crops, '/market-prices': t.market,
     '/tutorials': t.tutorials, '/about-contact': t.aboutUs,
+    '/dashboard/crop-health': t.diseasePrediction,
+    '/dashboard/irrigation': t.irrigationAdvisory,
+    '/dashboard/chatbot': t.aiChatbot,
   };
+
+  const navLinks = isAuthenticated ? privateLinks : publicLinks;
 
   const handleLogout = () => {
     logout();
@@ -77,8 +98,8 @@ export default function Navbar({ darkMode, setDarkMode }) {
             onClick={() => setMobileOpen(false)}
           >
             <span className="text-2xl">🌾</span>
-            <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent hidden xl:block">
-              SmartFarm
+            <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
+              FarmLytics
             </span>
           </Link>
 
@@ -128,25 +149,51 @@ export default function Navbar({ darkMode, setDarkMode }) {
               )}
             </button>
 
-            {/* Auth Action - Only Login or User Icon */}
+            {/* Auth Action - Profile Dropdown or Login */}
             <div className="hidden md:flex items-center">
               {isAuthenticated ? (
-                <div className="flex items-center gap-2">
-                  <Link
-                    to="/dashboard"
+                <div className="relative">
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-all"
                   >
                     <HiUser className="w-4 h-4" />
                     <span className="max-w-[80px] truncate">
                       {user?.name?.split(" ")[0]}
                     </span>
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                  >
-                    <HiLogout className="w-5 h-5" />
+                    <HiChevronDown className={`w-4 h-4 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
                   </button>
+                  {profileOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
+                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-card rounded-xl shadow-lg border border-gray-200 dark:border-dark-border py-1 z-50">
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-border transition-colors"
+                        >
+                          <HiUser className="w-4 h-4" />
+                          Dashboard
+                        </Link>
+                        <Link
+                          to="/dashboard/chatbot"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-border transition-colors"
+                        >
+                          <HiChat className="w-4 h-4" />
+                          AI Chatbot
+                        </Link>
+                        <div className="border-t border-gray-100 dark:border-dark-border my-1" />
+                        <button
+                          onClick={() => { setProfileOpen(false); handleLogout(); }}
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
+                          <HiLogout className="w-4 h-4" />
+                          Logout
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ) : (
                 <Link
@@ -207,7 +254,25 @@ export default function Navbar({ darkMode, setDarkMode }) {
                   </option>
                 ))}
               </select>
-              {!isAuthenticated && (
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-card"
+                  >
+                    <HiUser className="w-5 h-5" />
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    <HiLogout className="w-5 h-5" />
+                    Logout
+                  </button>
+                </>
+              ) : (
                 <Link
                   to="/login"
                   onClick={() => setMobileOpen(false)}

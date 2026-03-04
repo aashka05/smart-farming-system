@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import StatCard from '../components/StatCard';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from '../utils/useTranslation';
 import {
   HiChartBar, HiBeaker, HiCloud, HiChatAlt2, HiExclamation,
   HiShieldCheck, HiTrendingUp, HiTrendingDown,
@@ -13,11 +14,12 @@ import {
 import api from '../services/api';
 
 const quickLinks = [
-  { to: '/dashboard/crop-health', label: 'Crop Health', icon: '🔬', color: 'bg-green-50 dark:bg-green-900/20' },
-  { to: '/dashboard/yield-prediction', label: 'Yield Prediction', icon: '📊', color: 'bg-blue-50 dark:bg-blue-900/20' },
+  { to: '/dashboard/crop-health', label: 'Disease Prediction', icon: '🦠', color: 'bg-green-50 dark:bg-green-900/20' },
   { to: '/dashboard/irrigation', label: 'Irrigation Advisory', icon: '💧', color: 'bg-cyan-50 dark:bg-cyan-900/20' },
   { to: '/dashboard/chatbot', label: 'AI Chatbot', icon: '🤖', color: 'bg-purple-50 dark:bg-purple-900/20' },
 ];
+
+const qlKeys = { 'Disease Prediction': 'diseasePrediction', 'Irrigation Advisory': 'irrigationAdvisory', 'AI Chatbot': 'aiChatbot' };
 
 const severityConfig = {
   critical: {
@@ -49,6 +51,39 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const dStrings = useMemo(() => ({
+    welcomeBack: 'Welcome back,',
+    subtitle: "Here's your FarmLytics intelligence dashboard",
+    temperature: 'Temperature',
+    cropHealth: 'Crop Health',
+    price: 'Price',
+    irrigation: 'Irrigation',
+    diseasePrediction: 'Disease Prediction',
+    irrigationAdvisory: 'Irrigation Advisory',
+    aiChatbot: 'AI Chatbot',
+    weatherSummary: 'Weather Summary',
+    marketAlert: 'Market Alert',
+    riskAlerts: 'Risk Alerts',
+    irrigationAdvisoryPanel: 'Irrigation Advisory',
+    humidity: 'Humidity',
+    rainfall: 'Rainfall',
+    windSpeed: 'Wind Speed',
+    healthScore: 'Health Score',
+    crop: 'Crop',
+    diseaseRisk: 'Disease Risk',
+    perQuintal: 'per quintal',
+    topCrop: 'Top Crop',
+    change: 'Change',
+    soilMoisture: 'Soil Moisture',
+    loadingDashboard: 'Loading your dashboard\u2026',
+    dashboardError: 'Dashboard Error',
+    retry: 'Retry',
+    heatStress: 'Heat stress zone',
+    warm: 'Warm',
+    mild: 'Mild',
+  }), []);
+  const { t: dt } = useTranslation(dStrings);
+
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
@@ -76,7 +111,7 @@ export default function Dashboard() {
           className="text-center"
         >
           <div className="w-16 h-16 border-4 border-primary-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Loading your dashboard…</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">{dt.loadingDashboard}</p>
         </motion.div>
       </div>
     );
@@ -88,13 +123,13 @@ export default function Dashboard() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-dark-bg dark:to-dark-card">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 text-center max-w-md">
           <span className="text-5xl block mb-4">⚠️</span>
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Dashboard Error</h2>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{dt.dashboardError}</h2>
           <p className="text-gray-500 dark:text-gray-400 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="btn-primary inline-block"
           >
-            Retry
+            {dt.retry}
           </button>
         </motion.div>
       </div>
@@ -115,24 +150,24 @@ export default function Dashboard() {
         {/* ── Welcome Header ─────────────────────── */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="font-display font-bold text-3xl text-gray-800 dark:text-white">
-            Welcome back, <span className="gradient-text">{user?.name || 'Farmer'}</span> 👋
+            {dt.welcomeBack} <span className="gradient-text">{user?.name || 'Farmer'}</span> 👋
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Here's your farming intelligence dashboard</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">{dt.subtitle}</p>
         </motion.div>
 
         {/* ── Top Row: Summary Cards ─────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard
             icon="🌡️"
-            title="Temperature"
+            title={dt.temperature}
             value={weather.temp != null ? `${weather.temp.toFixed(1)}°C` : '--'}
-            subtitle={weather.temp > 38 ? '⚠️ Heat stress zone' : weather.temp > 30 ? '☀️ Warm' : '🌤️ Mild'}
+            subtitle={weather.temp > 38 ? `⚠️ ${dt.heatStress}` : weather.temp > 30 ? `☀️ ${dt.warm}` : `🌤️ ${dt.mild}`}
             color="orange"
             delay={0}
           />
           <StatCard
             icon="🌱"
-            title="Crop Health"
+            title={dt.cropHealth}
             value={`${cropHealth.healthScore}%`}
             subtitle={cropHealth.cropName}
             color={cropHealth.healthScore >= 70 ? 'green' : cropHealth.healthScore >= 40 ? 'orange' : 'red'}
@@ -140,7 +175,7 @@ export default function Dashboard() {
           />
           <StatCard
             icon="💰"
-            title={`${market.topCrop} Price`}
+            title={`${market.topCrop} ${dt.price}`}
             value={`₹${market.currentPrice.toLocaleString('en-IN')}/q`}
             subtitle={`${market.priceChange > 0 ? '↑' : '↓'} ${Math.abs(market.priceChange)}% this week`}
             color={market.priceChange > 0 ? 'blue' : 'red'}
@@ -148,7 +183,7 @@ export default function Dashboard() {
           />
           <StatCard
             icon="💧"
-            title="Irrigation"
+            title={dt.irrigation}
             value={irrigation.soilMoistureStatus}
             subtitle={irrigation.recommendation}
             color="cyan"
@@ -157,12 +192,12 @@ export default function Dashboard() {
         </div>
 
         {/* ── Quick Links ────────────────────────── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {quickLinks.map((link, i) => (
             <motion.div key={link.to} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.08 }}>
               <Link to={link.to} className={`glass-card-hover p-5 flex items-center gap-4 ${link.color}`}>
                 <span className="text-3xl">{link.icon}</span>
-                <span className="font-semibold text-gray-800 dark:text-white">{link.label}</span>
+                <span className="font-semibold text-gray-800 dark:text-white">{dt[qlKeys[link.label]] || link.label}</span>
               </Link>
             </motion.div>
           ))}
@@ -180,23 +215,23 @@ export default function Dashboard() {
           >
             <h3 className="font-display font-semibold text-lg mb-5 flex items-center gap-2">
               <HiCloud className="w-5 h-5 text-blue-500" />
-              Weather Summary
+              {dt.weatherSummary}
             </h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-3 rounded-lg bg-orange-50 dark:bg-orange-900/10">
-                <span className="text-sm text-gray-600 dark:text-gray-400">🌡️ Temperature</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">🌡️ {dt.temperature}</span>
                 <span className="font-bold text-gray-800 dark:text-white">{weather.temp?.toFixed(1) ?? '--'}°C</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50 dark:bg-blue-900/10">
-                <span className="text-sm text-gray-600 dark:text-gray-400">💧 Humidity</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">💧 {dt.humidity}</span>
                 <span className="font-bold text-gray-800 dark:text-white">{weather.humidity?.toFixed(0) ?? '--'}%</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-cyan-50 dark:bg-cyan-900/10">
-                <span className="text-sm text-gray-600 dark:text-gray-400">🌧️ Rainfall</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">🌧️ {dt.rainfall}</span>
                 <span className="font-bold text-gray-800 dark:text-white">{weather.rainfall?.toFixed(1) ?? '--'} mm</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/30">
-                <span className="text-sm text-gray-600 dark:text-gray-400">💨 Wind Speed</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">💨 {dt.windSpeed}</span>
                 <span className="font-bold text-gray-800 dark:text-white">{weather.wind?.toFixed(1) ?? '--'} m/s</span>
               </div>
             </div>
@@ -211,13 +246,13 @@ export default function Dashboard() {
           >
             <h3 className="font-display font-semibold text-lg mb-5 flex items-center gap-2">
               <HiBeaker className="w-5 h-5 text-green-500" />
-              Crop Health
+              {dt.cropHealth}
             </h3>
 
             {/* Health Score Bar */}
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Health Score</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{dt.healthScore}</span>
                 <span className={`text-2xl font-bold ${
                   cropHealth.healthScore >= 70 ? 'text-green-600' : cropHealth.healthScore >= 40 ? 'text-yellow-600' : 'text-red-600'
                 }`}>
@@ -238,11 +273,11 @@ export default function Dashboard() {
 
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-900/10">
-                <span className="text-sm text-gray-600 dark:text-gray-400">🌾 Crop</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">🌾 {dt.crop}</span>
                 <span className="font-semibold text-gray-800 dark:text-white text-sm">{cropHealth.cropName}</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-red-50 dark:bg-red-900/10">
-                <span className="text-sm text-gray-600 dark:text-gray-400">🦠 Disease Risk</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">🦠 {dt.diseaseRisk}</span>
                 <span className={`font-semibold text-sm ${
                   cropHealth.diseaseRisk === 'None detected' ? 'text-green-600' : 'text-red-600'
                 }`}>
@@ -276,7 +311,7 @@ export default function Dashboard() {
           >
             <h3 className="font-display font-semibold text-lg mb-5 flex items-center gap-2">
               <HiChartBar className="w-5 h-5 text-blue-500" />
-              Market Alert
+              {dt.marketAlert}
             </h3>
 
             <div className="text-center mb-5">
@@ -286,18 +321,18 @@ export default function Dashboard() {
               <p className="text-3xl font-bold text-gray-800 dark:text-white">
                 ₹{market.currentPrice.toLocaleString('en-IN')}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">per quintal</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{dt.perQuintal}</p>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50 dark:bg-blue-900/10">
-                <span className="text-sm text-gray-600 dark:text-gray-400">🌾 Top Crop</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">🌾 {dt.topCrop}</span>
                 <span className="font-semibold text-gray-800 dark:text-white">{market.topCrop}</span>
               </div>
               <div className={`flex items-center justify-between p-3 rounded-lg ${
                 market.priceChange > 0 ? 'bg-green-50 dark:bg-green-900/10' : 'bg-red-50 dark:bg-red-900/10'
               }`}>
-                <span className="text-sm text-gray-600 dark:text-gray-400">📊 Change</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">📊 {dt.change}</span>
                 <span className={`font-semibold flex items-center gap-1 ${
                   market.priceChange > 0 ? 'text-green-600' : 'text-red-600'
                 }`}>
@@ -331,7 +366,7 @@ export default function Dashboard() {
           >
             <h3 className="font-display font-semibold text-lg mb-5 flex items-center gap-2">
               <HiShieldCheck className="w-5 h-5 text-cyan-500" />
-              Irrigation Advisory
+              {dt.irrigationAdvisoryPanel}
             </h3>
 
             <div className="flex items-center gap-4 mb-5">
@@ -351,18 +386,18 @@ export default function Dashboard() {
                   {irrigation.recommendation}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Soil Moisture: {irrigation.soilMoistureStatus}
+                  {dt.soilMoisture}: {irrigation.soilMoistureStatus}
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 rounded-lg bg-cyan-50 dark:bg-cyan-900/10 text-center">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Humidity</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{dt.humidity}</p>
                 <p className="font-bold text-gray-800 dark:text-white">{weather.humidity?.toFixed(0) ?? '--'}%</p>
               </div>
               <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/10 text-center">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Rainfall</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{dt.rainfall}</p>
                 <p className="font-bold text-gray-800 dark:text-white">{weather.rainfall?.toFixed(1) ?? '--'} mm</p>
               </div>
             </div>
@@ -377,7 +412,7 @@ export default function Dashboard() {
           >
             <h3 className="font-display font-semibold text-lg mb-5 flex items-center gap-2">
               <HiExclamation className="w-5 h-5 text-orange-500" />
-              Risk Alerts
+              {dt.riskAlerts}
             </h3>
             <div className="space-y-3">
               {risks.map((alert, i) => {

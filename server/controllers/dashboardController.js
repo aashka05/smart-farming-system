@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const axios = require('axios');
 const { getLatestStationData } = require('./weatherStationController');
 
 // -------------------------------------------------------
@@ -71,10 +72,32 @@ const getDashboard = async (req, res) => {
       }
     }
 
-    // Final fallback: reasonable defaults so UI is never empty
+    // Final fallback: live Open-Meteo API, then reasonable defaults
     if (weather.temp === null) {
-      weather = { temp: 31.2, humidity: 58, rainfall: 0, wind: 4.5 };
-      soilMoisture = 42;
+      try {
+        const meteoUrl = process.env.OPEN_METEO_BASE_URL || 'https://api.open-meteo.com/v1/forecast';
+        const meteoRes = await axios.get(meteoUrl, {
+          params: {
+            latitude: parseFloat(process.env.DEFAULT_LATITUDE) || 22.3072,
+            longitude: parseFloat(process.env.DEFAULT_LONGITUDE) || 73.1812,
+            current: 'temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation',
+            timezone: 'auto',
+          },
+          timeout: 10000,
+        });
+        const cur = meteoRes.data.current;
+        weather = {
+          temp: cur?.temperature_2m ?? 31.2,
+          humidity: cur?.relative_humidity_2m ?? 58,
+          rainfall: cur?.precipitation ?? 0,
+          wind: cur?.wind_speed_10m ?? 4.5,
+        };
+        console.log('\ud83c\udf10 Dashboard weather from Open-Meteo API');
+      } catch (meteoErr) {
+        console.error('\u26a0\ufe0f Dashboard Open-Meteo fallback failed:', meteoErr.message);
+        weather = { temp: 31.2, humidity: 58, rainfall: 0, wind: 4.5 };
+      }
+      soilMoisture = soilMoisture ?? 42;
     }
 
     // ── 3. Crop health ────────────────────────────────
@@ -190,6 +213,37 @@ const getDashboard = async (req, res) => {
           };
         }
       }
+    }
+
+    // Try live market API for real-time prices
+    try {
+      const MARKET_API_URL = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070';
+      const marketRes = await axios.get(MARKET_API_URL, {
+        params: {
+          'api-key': '579b464db66ec23bdd0000010aa6c3f3acb747e15ce120e5c74de5ce',
+          format: 'json',
+          limit: 5,
+          ...(market.topCrop !== 'Rice' ? { 'filters[commodity]': market.topCrop } : {}),
+        },
+        timeout: 10000,
+      });
+
+      const records = marketRes.data?.records || [];
+      if (records.length > 0) {
+        const rec = records[0];
+        const livePrice = Number(rec.modal_price);
+        if (livePrice > 0) {
+          market = {
+            topCrop: rec.commodity || market.topCrop,
+            currentPrice: livePrice,
+            priceChange: market.priceChange,
+            alert: `Live price from ${rec.market || 'mandi'} — ₹${livePrice.toLocaleString('en-IN')}/q`,
+          };
+          console.log('📊 Dashboard market from live API');
+        }
+      }
+    } catch (marketErr) {
+      console.error('⚠️ Live market API failed:', marketErr.message);
     }
 
     // ── 5. Irrigation advisory ────────────────────────

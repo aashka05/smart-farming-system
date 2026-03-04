@@ -45,6 +45,27 @@ export default function Tutorials() {
           </p>
         </motion.div>
 
+        {/* Featured Tutorial Video */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-10 max-w-4xl mx-auto"
+        >
+          <div className="glass-card overflow-hidden rounded-2xl">
+            <div className="aspect-video">
+              <iframe
+                className="w-full h-full"
+                src="https://www.youtube.com/embed/wO8ERhClRjY"
+                title="FarmLytics Tutorials"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </motion.div>
+
         {/* Category Tabs */}
         <div className="flex flex-wrap gap-2 justify-center mb-10">
           {categories.map((cat) => (

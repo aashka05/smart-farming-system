@@ -43,7 +43,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   const strings = useMemo(() => ({
-    heroLine1: 'AI Powered', heroLine2: 'Smart Farming', heroLine3: 'Platform',
+    heroLine1: 'AI Powered', heroLine2: 'FarmLytics', heroLine3: 'Platform',
     heroDesc: "Farming shouldn't depend on guesswork. Our platform helps farmers predict weather changes, detect crop diseases early, and make better market decisions using simple AI-powered tools.",
     getStarted: 'Get Started', learnMore: 'Learn More',
     freeToUse: 'Free to Use', aiPowered: 'AI Powered', forFarmers: 'For Indian Farmers',
@@ -69,7 +69,7 @@ export default function Home() {
     s1t: 'Ask Questions or View Insights', s1d: 'Browse weather, crop info, market prices, or ask our AI assistant.',
     s2t: 'Improve Farming Decisions', s2d: 'Make data-driven decisions to increase yield and reduce losses.',
     ctaTitle: 'Ready to Transform Your Farming?',
-    ctaDesc: 'Join thousands of smart farmers using AI-powered insights to increase yield, reduce losses, and make better decisions every day.',
+    ctaDesc: 'Join thousands of farmers using FarmLytics AI-powered insights to increase yield, reduce losses, and make better decisions every day.',
     ctaBtn1: 'Create Free Account', ctaBtn2: 'Try AI Chatbot',
   }), []);
 

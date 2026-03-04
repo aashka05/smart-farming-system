@@ -22,8 +22,8 @@ const translations = {
     'Login': 'लॉगिन',
 
     // ── Footer ──
-    'AI-Powered Smart Farming Platform helping farmers make better decisions with weather insights, crop recommendations, and market intelligence.':
-      'AI-संचालित स्मार्ट खेती प्लेटफ़ॉर्म जो किसानों को मौसम की जानकारी, फसल सिफारिशों और बाज़ार बुद्धिमत्ता से बेहतर निर्णय लेने में मदद करता है।',
+    'AI-Powered FarmLytics Platform helping farmers make better decisions with weather insights, crop recommendations, and market intelligence.':
+      'AI-संचालित FarmLytics प्लेटफ़ॉर्म जो किसानों को मौसम की जानकारी, फसल सिफारिशों और बाज़ार बुद्धिमत्ता से बेहतर निर्णय लेने में मदद करता है।',
     'Quick Links': 'त्वरित लिंक',
     'Dashboard': 'डैशबोर्ड',
     'Contact Us': 'संपर्क करें',
@@ -37,12 +37,12 @@ const translations = {
     'Yield Prediction': 'उपज पूर्वानुमान',
     'Irrigation Advisory': 'सिंचाई सलाह',
     'AI Chatbot': 'AI चैटबॉट',
-    'Smart Farming Platform. Built with \u2764\uFE0F for Indian Farmers.':
-      'स्मार्ट खेती प्लेटफ़ॉर्म। भारतीय किसानों के लिए \u2764\uFE0F से बनाया गया।',
+    'FarmLytics. Built with \u2764\uFE0F for Indian Farmers.':
+      'FarmLytics। भारतीय किसानों के लिए \u2764\uFE0F से बनाया गया।',
 
     // ── Home – Hero ──
     'AI Powered': 'AI संचालित',
-    'Smart Farming': 'स्मार्ट खेती',
+    'FarmLytics': 'FarmLytics',
     'Platform': 'प्लेटफ़ॉर्म',
     "Farming shouldn't depend on guesswork. Our platform helps farmers predict weather changes, detect crop diseases early, and make better market decisions using simple AI-powered tools.":
       'खेती अनुमान पर निर्भर नहीं होनी चाहिए। हमारा प्लेटफ़ॉर्म किसानों को मौसम परिवर्तन की भविष्यवाणी करने, फसल रोगों का जल्दी पता लगाने और सरल AI-संचालित उपकरणों का उपयोग करके बेहतर बाज़ार निर्णय लेने में मदद करता है।',
@@ -215,7 +215,7 @@ const translations = {
 
     // ── Register ──
     'Create Account': 'खाता बनाएं',
-    'Join the smart farming revolution': 'स्मार्ट खेती क्रांति में शामिल हों',
+    'Join the FarmLytics revolution': 'FarmLytics क्रांति में शामिल हों',
     'Full Name': 'पूरा नाम',
     'Confirm Password': 'पासवर्ड की पुष्टि करें',
     'Already have an account?': 'पहले से खाता है?',
@@ -223,7 +223,7 @@ const translations = {
 
     // ── About & Contact ──
     'About': 'के बारे में',
-    'Smart Farming Platform': 'स्मार्ट खेती प्लेटफ़ॉर्म',
+    'FarmLytics': 'FarmLytics',
     'Empowering Indian farmers with AI-driven technology for sustainable and profitable agriculture':
       'टिकाऊ और लाभदायक कृषि के लिए AI-संचालित तकनीक से भारतीय किसानों को सशक्त बनाना',
     'Our Motivation': 'हमारी प्रेरणा',
@@ -262,6 +262,66 @@ const translations = {
     'Email Support': 'ईमेल सहायता',
     'Office': 'कार्यालय',
     '\u2753 Frequently Asked Questions': '\u2753 अक्सर पूछे जाने वाले प्रश्न',
+
+    // ── Dashboard ──
+    'Welcome back,': 'वापसी पर स्वागत है,',
+    "Here's your FarmLytics intelligence dashboard": 'यहाँ आपका FarmLytics इंटेलिजेंस डैशबोर्ड है',
+    'Temperature': 'तापमान',
+    'Price': 'मूल्य',
+    'Irrigation': 'सिंचाई',
+    'Disease Prediction': 'रोग भविष्यवाणी',
+    'Weather Summary': 'मौसम सारांश',
+    'Market Alert': 'बाज़ार अलर्ट',
+    'Risk Alerts': 'जोखिम अलर्ट',
+    'Rainfall': 'वर्षा',
+    'Wind Speed': 'हवा की गति',
+    'Health Score': 'स्वास्थ्य स्कोर',
+    'Disease Risk': 'रोग जोखिम',
+    'per quintal': 'प्रति क्विंटल',
+    'Top Crop': 'शीर्ष फसल',
+    'Change': 'बदलाव',
+    'Soil Moisture': 'मिट्टी की नमी',
+    'Loading your dashboard\u2026': 'आपका डैशबोर्ड लोड हो रहा है\u2026',
+    'Dashboard Error': 'डैशबोर्ड त्रुटि',
+    'Retry': 'पुनः प्रयास करें',
+    'Heat stress zone': 'गर्मी तनाव क्षेत्र',
+    'Warm': 'गर्म',
+    'Mild': 'हल्का',
+
+    // ── Disease Prediction (CropHealth) ──
+    'Upload an image of a crop leaf to detect possible plant diseases using AI': 'AI का उपयोग करके संभावित पौधों के रोगों का पता लगाने के लिए फसल पत्ती की तस्वीर अपलोड करें',
+    'Upload Crop Image': 'फसल छवि अपलोड करें',
+    'Click to upload crop image': 'फसल छवि अपलोड करने के लिए क्लिक करें',
+    'JPG, PNG up to 10MB': 'JPG, PNG 10MB तक',
+    'Analyze Image': 'छवि विश्लेषण करें',
+    'Analyzing...': 'विश्लेषण हो रहा है...',
+    'Detected Disease': 'पहचाना गया रोग',
+    'Confidence': 'विश्वास स्तर',
+    'Recommended Treatment': 'अनुशंसित उपचार',
+    'Upload & Analyze': 'अपलोड और विश्लेषण',
+    'Upload a crop leaf image to detect diseases and get treatment advice': 'रोगों का पता लगाने और उपचार सलाह प्राप्त करने के लिए फसल पत्ती की छवि अपलोड करें',
+    'Results based on mock data. ML model integration coming soon.': 'नमूना डेटा पर आधारित परिणाम। ML मॉडल एकीकरण जल्द आ रहा है।',
+
+    // ── Irrigation Advisory ──
+    'Smart irrigation scheduling based on soil moisture and weather conditions': 'मिट्टी की नमी और मौसम की स्थिति के आधार पर स्मार्ट सिंचाई शेड्यूलिंग',
+    'Sensor Inputs': 'सेंसर इनपुट',
+    'Soil Moisture (%)': 'मिट्टी की नमी (%)',
+    'Weather Condition': 'मौसम की स्थिति',
+    'Generate Schedule': 'शेड्यूल बनाएं',
+    'Weekly Water Usage (Liters)': 'साप्ताहिक पानी उपयोग (लीटर)',
+    'Total Water Needed': 'कुल पानी आवश्यक',
+    'Water Saved': 'पानी बचत',
+    "Today's Watering Schedule": 'आज का सिंचाई शेड्यूल',
+    'Smart Irrigation': 'स्मार्ट सिंचाई',
+    'Adjust soil moisture and weather to get optimized irrigation schedule': 'अनुकूलित सिंचाई शेड्यूल प्राप्त करने के लिए मिट्टी की नमी और मौसम समायोजित करें',
+    'Dry (0%)': 'सूखा (0%)',
+    'Optimal (50%)': 'इष्टतम (50%)',
+    'Wet (100%)': 'गीला (100%)',
+
+    // ── Market Prices (new) ──
+    'Loading market prices...': 'बाज़ार भाव लोड हो रहे हैं...',
+    'Unable to load market prices.': 'बाज़ार भाव लोड करने में असमर्थ।',
+    'Live prices sourced from government mandis via data.gov.in.': 'data.gov.in के माध्यम से सरकारी मंडियों से प्राप्त लाइव भाव।',
   },
 
   /* ───────────────────── GUJARATI ───────────────────── */
@@ -277,8 +337,8 @@ const translations = {
     'Login': 'લૉગિન',
 
     // ── Footer ──
-    'AI-Powered Smart Farming Platform helping farmers make better decisions with weather insights, crop recommendations, and market intelligence.':
-      'AI-સંચાલિત સ્માર્ટ ખેતી પ્લેટફોર્મ જે ખેડૂતોને હવામાન માહિતી, પાક ભલામણો અને બજાર બુદ્ધિમત્તા સાથે વધુ સારા નિર્ણયો લેવામાં મદદ કરે છે.',
+    'AI-Powered FarmLytics Platform helping farmers make better decisions with weather insights, crop recommendations, and market intelligence.':
+      'AI-સંચાલિત FarmLytics પ્લેટફોર્મ જે ખેડૂતોને હવામાન માહિતી, પાક ભલામણો અને બજાર બુદ્ધિમત્તા સાથે વધુ સારા નિર્ણયો લેવામાં મદદ કરે છે.',
     'Quick Links': 'ઝડપી લિંક્સ',
     'Dashboard': 'ડેશબોર્ડ',
     'Contact Us': 'અમારો સંપર્ક કરો',
@@ -292,12 +352,12 @@ const translations = {
     'Yield Prediction': 'ઉપજ આગાહી',
     'Irrigation Advisory': 'સિંચાઈ સલાહ',
     'AI Chatbot': 'AI ચેટબોટ',
-    'Smart Farming Platform. Built with \u2764\uFE0F for Indian Farmers.':
-      'સ્માર્ટ ખેતી પ્લેટફોર્મ. ભારતીય ખેડૂતો માટે \u2764\uFE0F થી બનાવેલ.',
+    'FarmLytics. Built with \u2764\uFE0F for Indian Farmers.':
+      'FarmLytics. ભારતીય ખેડૂતો માટે \u2764\uFE0F થી બનાવેલ.',
 
     // ── Home – Hero ──
     'AI Powered': 'AI સંચાલિત',
-    'Smart Farming': 'સ્માર્ટ ખેતી',
+    'FarmLytics': 'FarmLytics',
     'Platform': 'પ્લેટફોર્મ',
     "Farming shouldn't depend on guesswork. Our platform helps farmers predict weather changes, detect crop diseases early, and make better market decisions using simple AI-powered tools.":
       'ખેતી અંદાજ પર આધારિત ન હોવી જોઈએ. અમારું પ્લેટફોર્મ ખેડૂતોને હવામાન ફેરફારોની આગાહી કરવામાં, પાકના રોગોની વહેલી શોધ કરવામાં અને સરળ AI-સંચાલિત સાધનોનો ઉપયોગ કરીને વધુ સારા બજાર નિર્ણયો લેવામાં મદદ કરે છે.',
@@ -370,8 +430,8 @@ const translations = {
 
     // ── Home – CTA ──
     'Ready to Transform Your Farming?': 'તમારી ખેતી બદલવા માટે તૈયાર છો?',
-    'Join thousands of smart farmers using AI-powered insights to increase yield, reduce losses, and make better decisions every day.':
-      'હજારો સ્માર્ટ ખેડૂતો સાથે જોડાઓ જે ઉપજ વધારવા, નુકસાન ઘટાડવા અને દરરોજ વધુ સારા નિર્ણયો લેવા AI-સંચાલિત આંતરદૃષ્ટિનો ઉપયોગ કરે છે.',
+    'Join thousands of farmers using FarmLytics AI-powered insights to increase yield, reduce losses, and make better decisions every day.':
+      'હજારો ખેડૂતો સાથે જોડાઓ જે ઉપજ વધારવા, નુકસાન ઘટાડવા અને દરરોજ વધુ સારા નિર્ણયો લેવા FarmLytics AI-સંચાલિત આંતરદૃષ્ટિનો ઉપયોગ કરે છે.',
     'Create Free Account': 'મફત ખાતું બનાવો',
     'Try AI Chatbot': 'AI ચેટબોટ અજમાવો',
 
@@ -469,7 +529,7 @@ const translations = {
 
     // ── Register ──
     'Create Account': 'ખાતું બનાવો',
-    'Join the smart farming revolution': 'સ્માર્ટ ખેતી ક્રાંતિમાં જોડાઓ',
+    'Join the FarmLytics revolution': 'FarmLytics ક્રાંતિમાં જોડાઓ',
     'Full Name': 'પૂરું નામ',
     'Confirm Password': 'પાસવર્ડની પુષ્ટિ કરો',
     'Already have an account?': 'પહેલેથી ખાતું છે?',
@@ -477,7 +537,7 @@ const translations = {
 
     // ── About & Contact ──
     'About': 'વિશે',
-    'Smart Farming Platform': 'સ્માર્ટ ખેતી પ્લેટફોર્મ',
+    'FarmLytics': 'FarmLytics',
     'Empowering Indian farmers with AI-driven technology for sustainable and profitable agriculture':
       'ટકાઉ અને નફાકારક ખેતી માટે AI-સંચાલિત ટેકનોલોજી સાથે ભારતીય ખેડૂતોને સશક્ત બનાવવા',
     'Our Motivation': 'અમારી પ્રેરણા',
@@ -516,6 +576,66 @@ const translations = {
     'Email Support': 'ઈમેલ સહાય',
     'Office': 'કાર્યાલય',
     '\u2753 Frequently Asked Questions': '\u2753 વારંવાર પૂછાતા પ્રશ્નો',
+
+    // ── Dashboard ──
+    'Welcome back,': 'પાછા આવ્યાનું સ્વાગત છે,',
+    "Here's your FarmLytics intelligence dashboard": 'અહીં તમારું FarmLytics ઇન્ટેલિજન્સ ડેશબોર્ડ છે',
+    'Temperature': 'તાપમાન',
+    'Price': 'ભાવ',
+    'Irrigation': 'સિંચાઈ',
+    'Disease Prediction': 'રોગ આગાહી',
+    'Weather Summary': 'હવામાન સારાંશ',
+    'Market Alert': 'બજાર ચેતવણી',
+    'Risk Alerts': 'જોખમ ચેતવણીઓ',
+    'Rainfall': 'વરસાદ',
+    'Wind Speed': 'પવનની ગતિ',
+    'Health Score': 'આરોગ્ય સ્કોર',
+    'Disease Risk': 'રોગ જોખમ',
+    'per quintal': 'પ્રતિ ક્વિન્ટલ',
+    'Top Crop': 'ટોચનો પાક',
+    'Change': 'ફેરફાર',
+    'Soil Moisture': 'જમીનની ભેજ',
+    'Loading your dashboard\u2026': 'તમારું ડેશબોર્ડ લોડ થઈ રહ્યું છે\u2026',
+    'Dashboard Error': 'ડેશબોર્ડ ભૂલ',
+    'Retry': 'ફરી પ્રયાસ કરો',
+    'Heat stress zone': 'ગરમી તણાવ ઝોન',
+    'Warm': 'ગરમ',
+    'Mild': 'હળવું',
+
+    // ── Disease Prediction (CropHealth) ──
+    'Upload an image of a crop leaf to detect possible plant diseases using AI': 'AI નો ઉપયોગ કરીને સંભવિત છોડના રોગો શોધવા માટે પાકના પાંદડાની છબી અપલોડ કરો',
+    'Upload Crop Image': 'પાક છબી અપલોડ કરો',
+    'Click to upload crop image': 'પાક છબી અપલોડ કરવા ક્લિક કરો',
+    'JPG, PNG up to 10MB': 'JPG, PNG 10MB સુધી',
+    'Analyze Image': 'છબી વિશ્લેષણ કરો',
+    'Analyzing...': 'વિશ્લેષણ થઈ રહ્યું છે...',
+    'Detected Disease': 'શોધાયેલ રોગ',
+    'Confidence': 'વિશ્વાસ સ્તર',
+    'Recommended Treatment': 'ભલામણ કરેલ ઉપચાર',
+    'Upload & Analyze': 'અપલોડ અને વિશ્લેષણ',
+    'Upload a crop leaf image to detect diseases and get treatment advice': 'રોગો શોધવા અને ઉપચાર સલાહ મેળવવા પાકના પાંદડાની છબી અપલોડ કરો',
+    'Results based on mock data. ML model integration coming soon.': 'નમૂના ડેટા પર આધારિત પરિણામો. ML મોડેલ એકીકરણ ટૂંક સમયમાં આવશે.',
+
+    // ── Irrigation Advisory ──
+    'Smart irrigation scheduling based on soil moisture and weather conditions': 'જમીનની ભેજ અને હવામાન પરિસ્થિતિઓ પર આધારિત સ્માર્ટ સિંચાઈ શેડ્યુલિંગ',
+    'Sensor Inputs': 'સેન્સર ઇનપુટ્સ',
+    'Soil Moisture (%)': 'જમીનની ભેજ (%)',
+    'Weather Condition': 'હવામાન સ્થિતિ',
+    'Generate Schedule': 'શેડ્યુલ બનાવો',
+    'Weekly Water Usage (Liters)': 'સાપ્તાહિક પાણી વપરાશ (લિટર)',
+    'Total Water Needed': 'કુલ પાણી જરૂરી',
+    'Water Saved': 'પાણી બચત',
+    "Today's Watering Schedule": 'આજનું સિંચાઈ શેડ્યુલ',
+    'Smart Irrigation': 'સ્માર્ટ સિંચાઈ',
+    'Adjust soil moisture and weather to get optimized irrigation schedule': 'ઓપ્ટિમાઇઝ્ડ સિંચાઈ શેડ્યુલ મેળવવા જમીનની ભેજ અને હવામાન સમાયોજિત કરો',
+    'Dry (0%)': 'સૂકું (0%)',
+    'Optimal (50%)': 'શ્રેષ્ઠ (50%)',
+    'Wet (100%)': 'ભીનું (100%)',
+
+    // ── Market Prices (new) ──
+    'Loading market prices...': 'બજાર ભાવ લોડ થઈ રહ્યા છે...',
+    'Unable to load market prices.': 'બજાર ભાવ લોડ કરવામાં અસમર્થ.',
+    'Live prices sourced from government mandis via data.gov.in.': 'data.gov.in દ્વારા સરકારી મંડીઓમાંથી મેળવેલ લાઇવ ભાવ.',
   },
 };
 

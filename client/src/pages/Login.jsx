@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { HiMail, HiLockClosed, HiEye, HiEyeOff } from 'react-icons/hi';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { useTranslation } from '../utils/useTranslation';
@@ -11,7 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const lStrings = useMemo(() => ({
@@ -23,6 +24,16 @@ export default function Login() {
     registerHere: 'Register here',
   }), []);
   const { t: lt } = useTranslation(lStrings);
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await googleLogin(credentialResponse.credential);
+      toast.success('Welcome back! 🌾');
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Google sign-in failed.');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,7 +81,12 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{lt.password}</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{lt.password}</label>
+                <Link to="/forgot-password" className="text-xs text-primary-600 dark:text-primary-400 hover:underline">
+                  Forgot Password?
+                </Link>
+              </div>
               <div className="relative">
                 <HiLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -103,6 +119,22 @@ export default function Login() {
               )}
             </button>
           </form>
+
+          {/* Google OAuth Divider */}
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-dark-border" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-dark-border" />
+          </div>
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error('Google sign-in was unsuccessful. Please try again.')}
+              text="continue_with"
+              shape="rectangular"
+              width="100%"
+            />
+          </div>
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
             {lt.noAccount}{' '}

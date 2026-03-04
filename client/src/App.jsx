@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 
 // Public Pages
 import Home from './pages/Home';
@@ -16,11 +17,12 @@ import Tutorials from './pages/Tutorials';
 import AboutContact from './pages/AboutContact';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 // Dashboard Pages
 import Dashboard from './dashboard/Dashboard';
 import CropHealth from './dashboard/CropHealth';
-import YieldPrediction from './dashboard/YieldPrediction';
 import IrrigationAdvisory from './dashboard/IrrigationAdvisory';
 import AIChatbot from './dashboard/AIChatbot';
 
@@ -38,15 +40,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="glass-card p-8 text-center max-w-md">
-          <h2 className="text-2xl font-bold mb-4">🔒 Login Required</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">Please login to access this feature.</p>
-          <a href="/login" className="btn-primary inline-block">Go to Login</a>
-        </div>
-      </div>
-    );
+    return <Navigate to="/login" replace />;
   }
   return children;
 };
@@ -74,6 +68,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <ScrollToTop />
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
       <main className="flex-1">
         <AnimatePresence mode="wait">
@@ -95,13 +90,14 @@ function App() {
               <Route path="/about-contact" element={<AboutContact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
 
               {/* Protected Routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/dashboard/crop-health" element={<ProtectedRoute><CropHealth /></ProtectedRoute>} />
-              <Route path="/dashboard/yield-prediction" element={<ProtectedRoute><YieldPrediction /></ProtectedRoute>} />
               <Route path="/dashboard/irrigation" element={<ProtectedRoute><IrrigationAdvisory /></ProtectedRoute>} />
-              <Route path="/dashboard/chatbot" element={<AIChatbot />} />
+              <Route path="/dashboard/chatbot" element={<ProtectedRoute><AIChatbot /></ProtectedRoute>} />
             </Routes>
           </motion.div>
         </AnimatePresence>

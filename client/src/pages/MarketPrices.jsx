@@ -1,27 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { HiSearch, HiFilter, HiTrendingUp, HiTrendingDown } from 'react-icons/hi';
 import { useTranslation } from '../utils/useTranslation';
 
-const mockData = [
-  { crop: 'Rice', market: 'Ahmedabad APMC', state: 'Gujarat', district: 'Ahmedabad', minPrice: 1800, maxPrice: 2200, modalPrice: 2000 },
-  { crop: 'Wheat', market: 'Rajkot APMC', state: 'Gujarat', district: 'Rajkot', minPrice: 2100, maxPrice: 2500, modalPrice: 2300 },
-  { crop: 'Cotton', market: 'Surat APMC', state: 'Gujarat', district: 'Surat', minPrice: 5500, maxPrice: 6200, modalPrice: 5800 },
-  { crop: 'Maize', market: 'Indore Mandi', state: 'Madhya Pradesh', district: 'Indore', minPrice: 1400, maxPrice: 1800, modalPrice: 1600 },
-  { crop: 'Sugarcane', market: 'Pune APMC', state: 'Maharashtra', district: 'Pune', minPrice: 280, maxPrice: 350, modalPrice: 310 },
-  { crop: 'Soybean', market: 'Nagpur APMC', state: 'Maharashtra', district: 'Nagpur', minPrice: 4200, maxPrice: 4800, modalPrice: 4500 },
-  { crop: 'Groundnut', market: 'Junagadh APMC', state: 'Gujarat', district: 'Junagadh', minPrice: 4800, maxPrice: 5500, modalPrice: 5200 },
-  { crop: 'Bajra', market: 'Jodhpur Mandi', state: 'Rajasthan', district: 'Jodhpur', minPrice: 2000, maxPrice: 2400, modalPrice: 2200 },
-  { crop: 'Rice', market: 'Lucknow Mandi', state: 'Uttar Pradesh', district: 'Lucknow', minPrice: 1900, maxPrice: 2300, modalPrice: 2100 },
-  { crop: 'Wheat', market: 'Bhopal Mandi', state: 'Madhya Pradesh', district: 'Bhopal', minPrice: 2050, maxPrice: 2450, modalPrice: 2250 },
-  { crop: 'Tomato', market: 'Nashik APMC', state: 'Maharashtra', district: 'Nashik', minPrice: 800, maxPrice: 1500, modalPrice: 1100 },
-  { crop: 'Onion', market: 'Lasalgaon APMC', state: 'Maharashtra', district: 'Nashik', minPrice: 1200, maxPrice: 2000, modalPrice: 1600 },
-  { crop: 'Potato', market: 'Agra Mandi', state: 'Uttar Pradesh', district: 'Agra', minPrice: 600, maxPrice: 1000, modalPrice: 800 },
-  { crop: 'Cotton', market: 'Guntur APMC', state: 'Andhra Pradesh', district: 'Guntur', minPrice: 5600, maxPrice: 6400, modalPrice: 6000 },
-  { crop: 'Mustard', market: 'Jaipur Mandi', state: 'Rajasthan', district: 'Jaipur', minPrice: 4800, maxPrice: 5400, modalPrice: 5100 },
-];
+const API_URL = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd0000010aa6c3f3acb747e15ce120e5c74de5ce&format=json&limit=15';
 
 export default function MarketPrices() {
+  const [marketData, setMarketData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [stateFilter, setStateFilter] = useState('');
   const [districtFilter, setDistrictFilter] = useState('');
   const [cropFilter, setCropFilter] = useState('');
@@ -35,19 +22,50 @@ export default function MarketPrices() {
     crop: 'Crop', market: 'Market', state: 'State',
     minPrice: 'Min Price', maxPrice: 'Max Price', modalPrice: 'Modal Price',
     noResults: 'No matching results. Try different filters.',
-    disclaimer: 'Prices shown are mock data for demonstration. Will be replaced with live API data from government portals.',
+    disclaimer: 'Live prices sourced from government mandis via data.gov.in.',
+    loadingMsg: 'Loading market prices...',
+    errorMsg: 'Unable to load market prices.',
+    retry: 'Retry',
   }), []);
   const { t: mt } = useTranslation(mStrings);
 
-  const states = useMemo(() => [...new Set(mockData.map((d) => d.state))].sort(), []);
-  const allCrops = useMemo(() => [...new Set(mockData.map((d) => d.crop))].sort(), []);
+  useEffect(() => {
+    const fetchMarketData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('Failed to fetch market data');
+        const json = await res.json();
+        const records = (json.records || []).map((r) => ({
+          crop: r.commodity || '',
+          market: r.market || '',
+          state: r.state || '',
+          district: r.district || '',
+          minPrice: Number(r.min_price) || 0,
+          maxPrice: Number(r.max_price) || 0,
+          modalPrice: Number(r.modal_price) || 0,
+        }));
+        setMarketData(records);
+      } catch (err) {
+        console.error('Market data fetch error:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMarketData();
+  }, []);
+
+  const states = useMemo(() => [...new Set(marketData.map((d) => d.state))].sort(), [marketData]);
+  const allCrops = useMemo(() => [...new Set(marketData.map((d) => d.crop))].sort(), [marketData]);
   const districts = useMemo(() => {
-    if (!stateFilter) return [...new Set(mockData.map((d) => d.district))].sort();
-    return [...new Set(mockData.filter((d) => d.state === stateFilter).map((d) => d.district))].sort();
-  }, [stateFilter]);
+    if (!stateFilter) return [...new Set(marketData.map((d) => d.district))].sort();
+    return [...new Set(marketData.filter((d) => d.state === stateFilter).map((d) => d.district))].sort();
+  }, [stateFilter, marketData]);
 
   const filteredData = useMemo(() => {
-    return mockData.filter((d) => {
+    return marketData.filter((d) => {
       if (stateFilter && d.state !== stateFilter) return false;
       if (districtFilter && d.district !== districtFilter) return false;
       if (cropFilter && d.crop !== cropFilter) return false;
@@ -57,7 +75,7 @@ export default function MarketPrices() {
       }
       return true;
     });
-  }, [stateFilter, districtFilter, cropFilter, searchQuery]);
+  }, [stateFilter, districtFilter, cropFilter, searchQuery, marketData]);
 
   const clearFilters = () => {
     setStateFilter('');
@@ -65,6 +83,29 @@ export default function MarketPrices() {
     setCropFilter('');
     setSearchQuery('');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-yellow-50/30 to-white dark:from-dark-bg dark:to-dark-card flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">{mt.loadingMsg}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-yellow-50/30 to-white dark:from-dark-bg dark:to-dark-card flex items-center justify-center">
+        <div className="text-center glass-card p-8 max-w-md">
+          <span className="text-5xl block mb-4">⚠️</span>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{mt.errorMsg}</p>
+          <button onClick={() => window.location.reload()} className="btn-primary">{mt.retry}</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50/30 to-white dark:from-dark-bg dark:to-dark-card">
@@ -154,9 +195,7 @@ export default function MarketPrices() {
         </motion.div>
 
         {/* Disclaimer */}
-        <p className="text-xs text-gray-400 mt-4 text-center">
-          ℹ️ {mt.disclaimer}
-        </p>
+        
       </div>
     </div>
   );

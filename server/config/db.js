@@ -8,4 +8,9 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
+// Handle idle-client errors so the process doesn't crash
+pool.on('error', (err) => {
+  console.error('⚠️  Unexpected PostgreSQL pool error:', err.message);
+});
+
 module.exports = pool;
