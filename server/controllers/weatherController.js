@@ -5,8 +5,8 @@ const { getLatestStationData } = require('./weatherStationController');
 // Read from .env with sensible defaults
 const OPEN_METEO_URL = process.env.OPEN_METEO_BASE_URL || 'https://api.open-meteo.com/v1/forecast';
 const API_TIMEOUT = parseInt(process.env.WEATHER_API_TIMEOUT) || 10000;
-const DEFAULT_LAT = parseFloat(process.env.DEFAULT_LATITUDE) || 22.3072;
-const DEFAULT_LON = parseFloat(process.env.DEFAULT_LONGITUDE) || 73.1812;
+const DEFAULT_LAT = parseFloat(process.env.DEFAULT_LATITUDE) || 22.5645;
+const DEFAULT_LON = parseFloat(process.env.DEFAULT_LONGITUDE) || 72.9289;
 
 // -------------------------------------------------------
 // Helper: Generate mock weather data (last resort fallback)

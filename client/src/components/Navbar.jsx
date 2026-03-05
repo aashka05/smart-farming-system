@@ -23,23 +23,16 @@ import {
 } from "react-icons/hi";
 import { GiPlantSeed, GiWateringCan } from "react-icons/gi";
 
-const publicLinks = [
-  { to: "/", label: "Home", icon: HiHome },
+const exploreLinks = [
   { to: "/weather", label: "Weather", icon: HiCloud },
-  { to: "/disease-info", label: "Disease", icon: HiBeaker },
-  { to: "/crop-recommendation", label: "Crops", icon: GiPlantSeed },
-  { to: "/market-prices", label: "Market", icon: HiChartBar },
+  { to: "/market-prices", label: "Market Prices", icon: HiChartBar },
   { to: "/tutorials", label: "Tutorials", icon: HiAcademicCap },
-  { to: "/about-contact", label: "About Us", icon: HiInformationCircle },
 ];
 
-const privateLinks = [
+const aiToolsLinks = [
   { to: "/dashboard/crop-health", label: "Disease Prediction", icon: HiShieldCheck },
   { to: "/dashboard/irrigation", label: "Irrigation Advisory", icon: GiWateringCan },
   { to: "/dashboard/chatbot", label: "AI Chatbot", icon: HiChat },
-  { to: "/weather", label: "Weather", icon: HiCloud },
-  { to: "/market-prices", label: "Market", icon: HiChartBar },
-  { to: "/tutorials", label: "Tutorials", icon: HiAcademicCap },
 ];
 
 const languages = [
@@ -51,6 +44,10 @@ const languages = [
 export default function Navbar({ darkMode, setDarkMode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
+  const [aiToolsOpen, setAiToolsOpen] = useState(false);
+  const [mobileExploreOpen, setMobileExploreOpen] = useState(false);
+  const [mobileAiToolsOpen, setMobileAiToolsOpen] = useState(false);
   const { language, setLanguage } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
@@ -59,6 +56,8 @@ export default function Navbar({ darkMode, setDarkMode }) {
     home: 'Home', weather: 'Weather', disease: 'Disease',
     crops: 'Crops', market: 'Market', tutorials: 'Tutorials',
     aboutUs: 'About Us', login: 'Login',
+    explore: 'Explore', aiTools: 'AI Tools',
+    marketPrices: 'Market Prices',
     diseasePrediction: 'Disease Prediction',
     irrigationAdvisory: 'Irrigation Advisory',
     aiChatbot: 'AI Chatbot',
@@ -67,14 +66,12 @@ export default function Navbar({ darkMode, setDarkMode }) {
 
   const labelMap = {
     '/': t.home, '/weather': t.weather, '/disease-info': t.disease,
-    '/crop-recommendation': t.crops, '/market-prices': t.market,
+    '/crop-recommendation': t.crops, '/market-prices': t.marketPrices || t.market,
     '/tutorials': t.tutorials, '/about-contact': t.aboutUs,
     '/dashboard/crop-health': t.diseasePrediction,
     '/dashboard/irrigation': t.irrigationAdvisory,
     '/dashboard/chatbot': t.aiChatbot,
   };
-
-  const navLinks = isAuthenticated ? privateLinks : publicLinks;
 
   const handleLogout = () => {
     logout();
@@ -89,8 +86,8 @@ export default function Navbar({ darkMode, setDarkMode }) {
 
   return (
     <nav className="sticky top-0 z-50 bg-white/90 dark:bg-dark-bg/90 backdrop-blur-md border-b border-gray-200 dark:border-dark-border">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16 gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link
             to="/"
@@ -103,32 +100,115 @@ export default function Navbar({ darkMode, setDarkMode }) {
             </span>
           </Link>
 
-          {/* Desktop Nav Links - Optimized for single line */}
-          <div className="hidden lg:flex items-center justify-center flex-1 min-w-0">
-            <div className="flex items-center gap-1">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  className={({ isActive }) =>
-                    `px-2.5 py-2 rounded-lg transition-all duration-200 text-[13px] xl:text-[14px] whitespace-nowrap ${
-                      isActive ? activeLinkClass : linkClass
-                    }`
-                  }
+          {/* Desktop Nav Links - Grouped Dropdowns */}
+          <div className="hidden lg:flex items-center justify-center flex-1 min-w-0 mx-6">
+            <div className="flex items-center gap-2">
+              {/* Home */}
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded-lg transition-all duration-200 text-sm whitespace-nowrap ${
+                    isActive ? activeLinkClass : linkClass
+                  }`
+                }
+              >
+                {t.home}
+              </NavLink>
+
+              {/* Explore Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => { setExploreOpen(!exploreOpen); setAiToolsOpen(false); }}
+                  className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 text-sm whitespace-nowrap ${linkClass}`}
                 >
-                  {labelMap[link.to] || link.label}
-                </NavLink>
-              ))}
+                  {t.explore}
+                  <HiChevronDown className={`w-4 h-4 transition-transform ${exploreOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {exploreOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setExploreOpen(false)} />
+                    <div className="absolute left-0 mt-1 w-52 bg-white dark:bg-dark-card rounded-xl shadow-lg border border-gray-200 dark:border-dark-border py-1 z-50">
+                      {exploreLinks.map((link) => (
+                        <NavLink
+                          key={link.to}
+                          to={link.to}
+                          onClick={() => setExploreOpen(false)}
+                          className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                              isActive
+                                ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-border'
+                            }`
+                          }
+                        >
+                          <link.icon className="w-4 h-4" />
+                          {labelMap[link.to] || link.label}
+                        </NavLink>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* AI Tools Dropdown - Only when authenticated */}
+              {isAuthenticated && (
+                <div className="relative">
+                  <button
+                    onClick={() => { setAiToolsOpen(!aiToolsOpen); setExploreOpen(false); }}
+                    className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 text-sm whitespace-nowrap ${linkClass}`}
+                  >
+                    {t.aiTools}
+                    <HiChevronDown className={`w-4 h-4 transition-transform ${aiToolsOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {aiToolsOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setAiToolsOpen(false)} />
+                      <div className="absolute left-0 mt-1 w-52 bg-white dark:bg-dark-card rounded-xl shadow-lg border border-gray-200 dark:border-dark-border py-1 z-50">
+                        {aiToolsLinks.map((link) => (
+                          <NavLink
+                            key={link.to}
+                            to={link.to}
+                            onClick={() => setAiToolsOpen(false)}
+                            className={({ isActive }) =>
+                              `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                                isActive
+                                  ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-border'
+                              }`
+                            }
+                          >
+                            <link.icon className="w-4 h-4" />
+                            {labelMap[link.to] || link.label}
+                          </NavLink>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* About Us */}
+              <NavLink
+                to="/about-contact"
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded-lg transition-all duration-200 text-sm whitespace-nowrap ${
+                    isActive ? activeLinkClass : linkClass
+                  }`
+                }
+              >
+                {t.aboutUs}
+              </NavLink>
             </div>
           </div>
 
           {/* Right Side Tools */}
-          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Language dropdown */}
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="hidden sm:block text-xs bg-gray-50 dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-md px-1 py-1 cursor-pointer focus:outline-none"
+              className="hidden sm:block text-xs bg-gray-50 dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-md px-2 py-1.5 cursor-pointer focus:outline-none"
             >
               {languages.map((l) => (
                 <option key={l.code} value={l.code}>
@@ -168,20 +248,12 @@ export default function Navbar({ darkMode, setDarkMode }) {
                       <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
                       <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-card rounded-xl shadow-lg border border-gray-200 dark:border-dark-border py-1 z-50">
                         <Link
-                          to="/dashboard"
+                          to={user?.role === 'admin' ? '/admin' : '/dashboard'}
                           onClick={() => setProfileOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-border transition-colors"
                         >
                           <HiUser className="w-4 h-4" />
-                          Dashboard
-                        </Link>
-                        <Link
-                          to="/dashboard/chatbot"
-                          onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-border transition-colors"
-                        >
-                          <HiChat className="w-4 h-4" />
-                          AI Chatbot
+                          {user?.role === 'admin' ? 'Admin Dashboard' : 'Dashboard'}
                         </Link>
                         <div className="border-t border-gray-100 dark:border-dark-border my-1" />
                         <button
@@ -198,7 +270,7 @@ export default function Navbar({ darkMode, setDarkMode }) {
               ) : (
                 <Link
                   to="/login"
-                  className="px-5 py-2 text-sm font-semibold bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all shadow-sm"
+                  className="px-4 py-2 text-sm font-semibold bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all shadow-sm whitespace-nowrap"
                 >
                   {t.login}
                 </Link>
@@ -220,27 +292,107 @@ export default function Navbar({ darkMode, setDarkMode }) {
         </div>
       </div>
 
-      {/* Mobile Menu - Remains consistent */}
+      {/* Mobile Menu */}
       {mobileOpen && (
         <div className="lg:hidden bg-white dark:bg-dark-bg border-t border-gray-200 dark:border-dark-border">
           <div className="px-4 py-3 space-y-1">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={() => setMobileOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl ${
-                    isActive
-                      ? "bg-primary-50 text-primary-600"
-                      : "text-gray-700 dark:text-gray-300"
-                  }`
-                }
+            {/* Home */}
+            <NavLink
+              to="/"
+              end
+              onClick={() => setMobileOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl ${
+                  isActive ? "bg-primary-50 text-primary-600" : "text-gray-700 dark:text-gray-300"
+                }`
+              }
+            >
+              <HiHome className="w-5 h-5" />
+              {t.home}
+            </NavLink>
+
+            {/* Explore Section */}
+            <div>
+              <button
+                onClick={() => setMobileExploreOpen(!mobileExploreOpen)}
+                className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300"
               >
-                <link.icon className="w-5 h-5" />
-                {labelMap[link.to] || link.label}
-              </NavLink>
-            ))}
+                <span className="flex items-center gap-3">
+                  <HiGlobe className="w-5 h-5" />
+                  {t.explore}
+                </span>
+                <HiChevronDown className={`w-4 h-4 transition-transform ${mobileExploreOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {mobileExploreOpen && (
+                <div className="ml-6 space-y-1">
+                  {exploreLinks.map((link) => (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      onClick={() => setMobileOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm ${
+                          isActive ? "bg-primary-50 text-primary-600" : "text-gray-600 dark:text-gray-400"
+                        }`
+                      }
+                    >
+                      <link.icon className="w-4 h-4" />
+                      {labelMap[link.to] || link.label}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* AI Tools Section - Only when authenticated */}
+            {isAuthenticated && (
+              <div>
+                <button
+                  onClick={() => setMobileAiToolsOpen(!mobileAiToolsOpen)}
+                  className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300"
+                >
+                  <span className="flex items-center gap-3">
+                    <HiChat className="w-5 h-5" />
+                    {t.aiTools}
+                  </span>
+                  <HiChevronDown className={`w-4 h-4 transition-transform ${mobileAiToolsOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {mobileAiToolsOpen && (
+                  <div className="ml-6 space-y-1">
+                    {aiToolsLinks.map((link) => (
+                      <NavLink
+                        key={link.to}
+                        to={link.to}
+                        onClick={() => setMobileOpen(false)}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm ${
+                            isActive ? "bg-primary-50 text-primary-600" : "text-gray-600 dark:text-gray-400"
+                          }`
+                        }
+                      >
+                        <link.icon className="w-4 h-4" />
+                        {labelMap[link.to] || link.label}
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* About Us */}
+            <NavLink
+              to="/about-contact"
+              onClick={() => setMobileOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl ${
+                  isActive ? "bg-primary-50 text-primary-600" : "text-gray-700 dark:text-gray-300"
+                }`
+              }
+            >
+              <HiInformationCircle className="w-5 h-5" />
+              {t.aboutUs}
+            </NavLink>
+
             <div className="pt-4 border-t border-gray-100 dark:border-dark-border space-y-3">
               {/* Mobile language selector */}
               <select
@@ -257,12 +409,12 @@ export default function Navbar({ darkMode, setDarkMode }) {
               {isAuthenticated ? (
                 <>
                   <Link
-                    to="/dashboard"
+                    to={user?.role === 'admin' ? '/admin' : '/dashboard'}
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-card"
                   >
                     <HiUser className="w-5 h-5" />
-                    Dashboard
+                    {user?.role === 'admin' ? 'Admin Dashboard' : 'Dashboard'}
                   </Link>
                   <button
                     onClick={handleLogout}

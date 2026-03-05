@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { HiPaperAirplane, HiLightBulb } from 'react-icons/hi';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import api from '../services/api';
 
 const AI_SERVICE_URL = 'http://localhost:8000';
 
@@ -188,6 +189,7 @@ export default function AIChatbot() {
       const decoder = new TextDecoder();
       let buffer = '';
       let currentEvent = null;
+      let botResponseText = '';  // track full response for logging
 
       while (true) {
         const { done, value } = await reader.read();
@@ -210,6 +212,7 @@ export default function AIChatbot() {
 
               if (currentEvent === 'text' && data.data) {
                 const token = data.data;
+                botResponseText += token;  // track for logging
                 setMessages((prev) => {
                   const copy = [...prev];
                   const last = copy[copy.length - 1];
@@ -251,13 +254,18 @@ export default function AIChatbot() {
           }
         }
       }
+
+      // Log chat interaction to backend (fire-and-forget)
+      if (botResponseText) {
+        api.post('/chat/log', { question: userMsg, response: botResponseText }).catch(() => {});
+      }
     } catch (err) {
       if (err.name !== 'AbortError') {
         setMessages((prev) => {
           const updated = [...prev];
           const lastBot = updated[updated.length - 1];
           if (lastBot?.role === 'bot' && !lastBot.text) {
-            lastBot.text = `⚠️ Could not connect to AI service. Make sure the server is running at ${AI_SERVICE_URL}`;
+            lastBot.text = '⚠️ Chatbot service unavailable. Please try again later.';
           }
           return updated;
         });

@@ -65,11 +65,11 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-primary-200/80 text-sm">
                 <HiMail className="w-4 h-4 text-primary-400 flex-shrink-0" />
-                <span>support@farmlytics.in</span>
+                <span>farmlyticswork@gmail.com</span>
               </li>
               <li className="flex items-center gap-3 text-primary-200/80 text-sm">
                 <HiPhone className="w-4 h-4 text-primary-400 flex-shrink-0" />
-                <span>9XXXXXXXXX (Toll Free)</span>
+                <span>9427107324</span>
               </li>
               <li className="flex items-start gap-3 text-primary-200/80 text-sm">
                 <HiLocationMarker className="w-4 h-4 text-primary-400 flex-shrink-0 mt-0.5" />

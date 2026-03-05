@@ -1,3 +1,67 @@
+const axios = require('axios');
+
+const CHANNEL_ID = 'UC9OoW-ceIDeJLBVX37gBCww';
+const FEED_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
+
+// Simple XML tag extractor (works for YouTube Atom feeds)
+function extractTag(xml, tag) {
+  const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`);
+  const m = xml.match(re);
+  return m ? m[1].trim() : '';
+}
+function extractAttr(xml, tag, attr) {
+  const re = new RegExp(`<${tag}[^>]*${attr}="([^"]*)"`, 'i');
+  const m = xml.match(re);
+  return m ? m[1] : '';
+}
+
+// @desc    Get real videos from the YouTube channel RSS feed
+// @route   GET /api/tutorials/playlist
+// @access  Public
+const getPlaylistVideos = async (req, res) => {
+  try {
+    const { data: xml } = await axios.get(FEED_URL, { timeout: 10000 });
+
+    // Split into <entry> blocks
+    const entries = xml.split('<entry>').slice(1); // first item is <feed> header
+
+    const videos = entries.map((entry) => {
+      const videoId = extractTag(entry, 'yt:videoId');
+      const title = extractTag(entry, 'title')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+      const published = extractTag(entry, 'published');
+      const thumbnail = extractAttr(entry, 'media:thumbnail', 'url')
+        || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+      const views = extractAttr(entry, 'media:statistics', 'views') || '0';
+      const rating = extractAttr(entry, 'media:starRating', 'average') || '0';
+
+      // Get first ~200 chars of description, strip boilerplate
+      let description = extractTag(entry, 'media:description') || '';
+      // Strip common boilerplate footer that starts with "गो-कृपा" or phone numbers
+      const boilerplateIdx = description.indexOf('"गो-कृपा अमृतम्"');
+      if (boilerplateIdx > 0) description = description.substring(0, boilerplateIdx).trim();
+      if (description.length > 200) description = description.substring(0, 197) + '...';
+      description = description
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/\n/g, ' ')
+        .trim();
+
+      return { videoId, title, published, thumbnail, views: parseInt(views, 10), rating: parseFloat(rating), description };
+    }).filter((v) => v.videoId);
+
+    res.json({ videos, channelId: CHANNEL_ID, source: 'youtube-rss' });
+  } catch (error) {
+    console.error('Playlist fetch error:', error.message);
+    res.status(500).json({ message: 'Failed to fetch playlist', error: error.message });
+  }
+};
+
 // @desc    Get tutorials by category
 // @route   GET /api/tutorials
 // @access  Public
@@ -51,4 +115,4 @@ function getMockTutorials() {
   ];
 }
 
-module.exports = { getTutorials, getTutorialById };
+module.exports = { getTutorials, getTutorialById, getPlaylistVideos };

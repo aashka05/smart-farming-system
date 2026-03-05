@@ -10,14 +10,15 @@ import FeatureCard from '../components/FeatureCard';
 import HeroVisual from '../components/HeroVisual';
 import IntroAnimation from '../components/IntroAnimation';
 import { useTranslation } from '../utils/useTranslation';
+import { useAuth } from '../context/AuthContext';
 
 const features = [
-  { icon: '🌤️', title: 'Weather Forecast', description: 'Real-time weather updates with farming-specific insights and alerts for your region.' },
-  { icon: '🌱', title: 'Crop Recommendation', description: 'AI-powered crop suggestions based on soil type, rainfall, temperature and season.' },
-  { icon: '🔬', title: 'Plant Disease Detection', description: 'Identify crop diseases from images with treatment recommendations and prevention tips.' },
-  { icon: '🤖', title: 'AI Farming Chatbot', description: 'Ask any farming question and get instant expert advice powered by artificial intelligence.' },
-  { icon: '📊', title: 'Market Price Insights', description: 'Live market prices for crops across mandis with trend analysis and price alerts.' },
-  { icon: '💧', title: 'Irrigation Advisory', description: 'Smart irrigation scheduling based on soil moisture, weather data and crop requirements.' },
+  { icon: '🌤️', title: 'Weather Forecast', description: 'Real-time weather updates with farming-specific insights and alerts for your region.', link: '/weather' },
+  { icon: '🌱', title: 'Crop Recommendation', description: 'AI-powered crop suggestions based on soil type, rainfall, temperature and season.', link: '/crop-recommendation' },
+  { icon: '🔬', title: 'Plant Disease Detection', description: 'Identify crop diseases from images with treatment recommendations and prevention tips.', link: '/disease-info' },
+  { icon: '🤖', title: 'AI Farming Chatbot', description: 'Ask any farming question and get instant expert advice powered by artificial intelligence.', link: '/dashboard/chatbot' },
+  { icon: '📊', title: 'Market Price Insights', description: 'Live market prices for crops across mandis with trend analysis and price alerts.', link: '/market-prices' },
+  { icon: '💧', title: 'Irrigation Advisory', description: 'Smart irrigation scheduling based on soil moisture, weather data and crop requirements.', link: '/dashboard/irrigation' },
 ];
 
 const problems = [
@@ -41,6 +42,7 @@ const steps = [
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
 
   const strings = useMemo(() => ({
     heroLine1: 'AI Powered', heroLine2: 'FarmLytics', heroLine3: 'Platform',
@@ -135,7 +137,7 @@ export default function Home() {
                   {t.heroDesc}
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <Link to="/register" className="btn-primary flex items-center gap-2">
+                  <Link to={isAuthenticated ? "/dashboard" : "/register"} className="btn-primary flex items-center gap-2">
                     {t.getStarted} <HiArrowRight className="w-5 h-5" />
                   </Link>
                   <Link to="/about-contact" className="btn-secondary">
@@ -194,7 +196,7 @@ export default function Home() {
             <p className="section-subtitle">{t.featSubtitle}</p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {tFeatures.map((f, i) => (
-                <FeatureCard key={i} icon={f.icon} title={f.title} description={f.description} delay={i * 0.08} />
+                <FeatureCard key={i} icon={f.icon} title={f.title} description={f.description} delay={i * 0.08} link={f.link} />
               ))}
             </div>
           </div>
@@ -230,7 +232,7 @@ export default function Home() {
                 {t.ctaDesc}
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Link to="/register" className="bg-white text-primary-700 font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+                <Link to={isAuthenticated ? "/dashboard" : "/register"} className="bg-white text-primary-700 font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
                   {t.ctaBtn1}
                 </Link>
                 <Link to="/dashboard/chatbot" className="border-2 border-white/30 text-white font-semibold py-3 px-8 rounded-xl hover:bg-white/10 transition-all duration-300">

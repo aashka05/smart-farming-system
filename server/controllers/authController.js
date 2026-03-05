@@ -57,7 +57,7 @@ const register = async (req, res) => {
       id: user.id,
       name: user.full_name,
       email: user.email,
-      role: 'farmer',
+      role: user.role || 'farmer',
       language: 'en',
       token: generateToken(user.id),
     });
@@ -75,7 +75,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Find user
-    const result = await pool.query('SELECT id, full_name, email, password_hash FROM farmers WHERE email = $1', [
+    const result = await pool.query('SELECT id, full_name, email, password_hash, role FROM farmers WHERE email = $1', [
       email,
     ]);
 
@@ -95,7 +95,7 @@ const login = async (req, res) => {
       id: user.id,
       name: user.full_name,
       email: user.email,
-      role: 'farmer',
+      role: user.role || 'farmer',
       language: 'en',
       token: generateToken(user.id),
     });
@@ -111,7 +111,7 @@ const login = async (req, res) => {
 const getMe = async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, full_name, email FROM farmers WHERE id = $1',
+      'SELECT id, full_name, email, role FROM farmers WHERE id = $1',
       [req.user.id]
     );
 
@@ -125,7 +125,7 @@ const getMe = async (req, res) => {
       id: user.id,
       name: user.full_name,
       email: user.email,
-      role: 'farmer',
+      role: user.role || 'farmer',
       location: {},
       language: 'en',
     });
@@ -166,7 +166,7 @@ const googleLogin = async (req, res) => {
         id: user.id,
         name: user.full_name,
         email: user.email,
-        role: 'farmer',
+        role: user.role || 'farmer',
         language: 'en',
         token: generateToken(user.id),
       });
@@ -190,7 +190,7 @@ const googleLogin = async (req, res) => {
       id: user.id,
       name: user.full_name,
       email: user.email,
-      role: 'farmer',
+      role: user.role || 'farmer',
       language: 'en',
       token: generateToken(user.id),
     });

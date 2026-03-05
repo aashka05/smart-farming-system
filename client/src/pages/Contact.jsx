@@ -104,8 +104,8 @@ export default function Contact() {
                     <HiPhone className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Helpline (Toll Free)</p>
-                    <p className="font-semibold text-gray-800 dark:text-white">1800-FARM-HELP</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Helpline</p>
+                    <p className="font-semibold text-gray-800 dark:text-white">9427107324</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-3 bg-green-50 dark:bg-green-900/10 rounded-xl">
@@ -114,7 +114,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Email Support</p>
-                    <p className="font-semibold text-gray-800 dark:text-white">support@farmlytics.in</p>
+                    <p className="font-semibold text-gray-800 dark:text-white">farmlyticswork@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-3 bg-purple-50 dark:bg-purple-900/10 rounded-xl">
@@ -123,7 +123,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Office</p>
-                    <p className="font-semibold text-gray-800 dark:text-white text-sm">FarmLytics Lab, Agricultural University, India</p>
+                    <p className="font-semibold text-gray-800 dark:text-white text-sm">Birla Vishvakarma Mahavidyalaya</p>
                   </div>
                 </div>
               </div>

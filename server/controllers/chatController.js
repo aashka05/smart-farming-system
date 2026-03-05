@@ -1,3 +1,25 @@
+const pool = require('../config/db');
+
+// @desc    Log a chat interaction to the database
+// @route   POST /api/chat/log
+// @access  Private
+const logChat = async (req, res) => {
+  try {
+    const { question, response } = req.body;
+    if (!question) return res.status(400).json({ message: 'Question is required' });
+
+    const farmerId = req.user?.id || null;
+    await pool.query(
+      'INSERT INTO chatbot_logs (farmer_id, question, response, created_at) VALUES ($1, $2, $3, NOW())',
+      [farmerId, question.substring(0, 2000), (response || '').substring(0, 5000)]
+    );
+    res.json({ logged: true });
+  } catch (error) {
+    console.error('Chat log error:', error.message);
+    res.status(500).json({ message: 'Failed to log chat' });
+  }
+};
+
 // @desc    Chat with AI farming assistant
 // @route   POST /api/chat
 // @access  Public (limited) / Private (full)
@@ -62,4 +84,4 @@ function generateMockResponse(message) {
   return 'Thank you for your question! As your AI farming assistant, I can help with crop recommendations, weather insights, disease identification, irrigation advice, and market prices. Could you please provide more details about what you need help with?';
 }
 
-module.exports = { chat, getSuggestions };
+module.exports = { chat, getSuggestions, logChat };

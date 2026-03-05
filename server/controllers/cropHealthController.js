@@ -1,4 +1,5 @@
 const axios = require('axios');
+const pool = require('../config/db');
 
 // Correct endpoint: /identification (NOT /health_assessment which returns 404)
 const KINDWISE_API_URL = 'https://crop.kindwise.com/api/v1/identification';
@@ -141,6 +142,18 @@ const identifyCropDisease = async (req, res) => {
 
     console.log('✅ Crop health result:', result.disease, `(${result.confidence}%)`, 'Crop:', result.crop, 'Lang:', lang);
     res.json(result);
+
+    // Save detection to database (fire-and-forget, does not block response)
+    try {
+      await pool.query(
+        `INSERT INTO disease_detections (farmer_id, detected_disease, confidence_score, image_url)
+         VALUES ($1, $2, $3, $4)`,
+        [req.user.id, topDisease?.name || 'Healthy', topDisease?.probability || 0, 'uploaded']
+      );
+      console.log('✅ Disease detection saved to DB for farmer', req.user.id);
+    } catch (dbErr) {
+      console.error('⚠️ Could not save disease detection:', dbErr.message);
+    }
   } catch (error) {
     console.error('Crop health identification error:', error.response?.status, error.response?.data || error.message);
 

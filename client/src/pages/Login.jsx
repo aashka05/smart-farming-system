@@ -64,6 +64,24 @@ export default function Login() {
             <p className="text-gray-500 dark:text-gray-400 mt-1">{lt.signInSubtitle}</p>
           </div>
 
+          {/* Google Sign-In First */}
+          <div className="flex justify-center mb-5">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error('Google sign-in was unsuccessful. Please try again.')}
+              text="continue_with"
+              shape="rectangular"
+              width="100%"
+            />
+          </div>
+
+          {/* OR Divider */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-dark-border" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-dark-border" />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{lt.email}</label>
@@ -119,22 +137,6 @@ export default function Login() {
               )}
             </button>
           </form>
-
-          {/* Google OAuth Divider */}
-          <div className="flex items-center gap-3 my-5">
-            <div className="flex-1 h-px bg-gray-200 dark:bg-dark-border" />
-            <span className="text-xs text-gray-400">or</span>
-            <div className="flex-1 h-px bg-gray-200 dark:bg-dark-border" />
-          </div>
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => toast.error('Google sign-in was unsuccessful. Please try again.')}
-              text="continue_with"
-              shape="rectangular"
-              width="100%"
-            />
-          </div>
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
             {lt.noAccount}{' '}

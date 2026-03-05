@@ -1,51 +1,170 @@
-import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import TutorialCard from '../components/TutorialCard';
-import { useTranslation } from '../utils/useTranslation';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { HiPlay, HiEye, HiCalendar, HiX, HiRefresh } from 'react-icons/hi';
+import api from '../services/api';
 
-const categories = ['All', 'Organic Farming', 'Drip Irrigation', 'Pest Control', 'Seasonal Crop Planning', 'Soil Health'];
+/* ── Format helpers ───────────────────────────────────────── */
+function formatViews(n) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
+function formatDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
-const tutorials = [
-  { id: '1', title: 'Introduction to Organic Farming', category: 'Organic Farming', duration: '12:34', description: 'Learn the basics of organic farming and sustainable agricultural practices for healthier crops.' },
-  { id: '2', title: 'Setting Up Drip Irrigation System', category: 'Drip Irrigation', duration: '18:22', description: 'Step-by-step guide to installing a cost-effective drip irrigation system on your farm.' },
-  { id: '3', title: 'Natural Pest Control Methods', category: 'Pest Control', duration: '15:45', description: 'Effective organic and natural pest control techniques for common crop pests.' },
-  { id: '4', title: 'Seasonal Crop Planning Guide', category: 'Seasonal Crop Planning', duration: '20:10', description: 'Plan your crops according to seasons for maximum yield and profit throughout the year.' },
-  { id: '5', title: 'Soil Health Management', category: 'Soil Health', duration: '14:55', description: 'Understanding soil health indicators and how to improve soil fertility naturally.' },
-  { id: '6', title: 'Advanced Composting Techniques', category: 'Organic Farming', duration: '16:30', description: 'Learn how to make high-quality compost and vermicompost for your organic farm.' },
-  { id: '7', title: 'Water-Efficient Farming Practices', category: 'Drip Irrigation', duration: '11:40', description: 'Techniques to reduce water usage by 40% while maintaining crop productivity.' },
-  { id: '8', title: 'Integrated Pest Management (IPM)', category: 'Pest Control', duration: '22:15', description: 'Comprehensive IPM approach combining biological, cultural, and chemical strategies.' },
-  { id: '9', title: 'Kharif Season Crop Selection', category: 'Seasonal Crop Planning', duration: '13:20', description: 'Best crops to grow during the kharif season with soil and water requirements.' },
-  { id: '10', title: 'Soil Testing at Home', category: 'Soil Health', duration: '9:50', description: 'Simple methods to test your soil quality at home without expensive lab equipment.' },
-  { id: '11', title: 'Zero Budget Natural Farming', category: 'Organic Farming', duration: '25:00', description: 'Complete guide to ZBNF — reducing input costs while maintaining crop quality.' },
-  { id: '12', title: 'Micro-Sprinkler vs Drip: Which to Choose?', category: 'Drip Irrigation', duration: '14:10', description: 'Comparing micro-sprinkler and drip systems for different crop types and soil conditions.' },
-];
+/* ── Video Card ───────────────────────────────────────────── */
+function VideoCard({ video, index, onPlay }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="glass-card-hover overflow-hidden group cursor-pointer"
+      onClick={() => onPlay(video)}
+    >
+      {/* Thumbnail */}
+      <div className="relative aspect-video bg-gray-200 dark:bg-dark-border overflow-hidden">
+        <img
+          src={video.thumbnail}
+          alt={video.title}
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        {/* Play overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-red-600/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-lg">
+            <HiPlay className="w-7 h-7 text-white ml-1" />
+          </div>
+        </div>
+        {/* Views badge */}
+        <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
+          <HiEye className="w-3 h-3" />
+          {formatViews(video.views)}
+        </div>
+      </div>
 
+      {/* Content */}
+      <div className="p-4">
+        <h3 className="font-display font-semibold text-gray-800 dark:text-white line-clamp-2 text-sm leading-snug min-h-[2.5rem]">
+          {video.title}
+        </h3>
+        {video.description && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
+            {video.description}
+          </p>
+        )}
+        <div className="flex items-center gap-2 mt-3 text-xs text-gray-400">
+          <HiCalendar className="w-3.5 h-3.5" />
+          {formatDate(video.published)}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── Video Player Modal ───────────────────────────────────── */
+function VideoModal({ video, onClose }) {
+  if (!video) return null;
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          transition={{ type: 'spring', duration: 0.4 }}
+          className="w-full max-w-4xl bg-white dark:bg-dark-card rounded-2xl overflow-hidden shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-dark-border">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-white truncate pr-4">
+              {video.title}
+            </h3>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-border transition-colors shrink-0"
+            >
+              <HiX className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+          {/* Player */}
+          <div className="aspect-video">
+            <iframe
+              className="w-full h-full"
+              src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&rel=0`}
+              title={video.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+          {/* Info */}
+          <div className="px-5 py-3 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-dark-border">
+            <span className="flex items-center gap-1"><HiEye className="w-3.5 h-3.5" /> {formatViews(video.views)} views</span>
+            <span className="flex items-center gap-1"><HiCalendar className="w-3.5 h-3.5" /> {formatDate(video.published)}</span>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+/* ── Main Tutorials Page ──────────────────────────────────── */
 export default function Tutorials() {
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [playing, setPlaying] = useState(null);
 
-  const tStrings = useMemo(() => ({
-    title: 'Farming Tutorials',
-    subtitle: 'Learn modern farming techniques through expert video tutorials',
-    noTutorials: 'No tutorials in this category yet.',
-    note: 'Tutorial videos will be integrated with YouTube Data API for real video content.',
-  }), []);
-  const { t: tt } = useTranslation(tStrings);
+  const fetchVideos = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await api.get('/tutorials/playlist');
+      setVideos(data.videos || []);
+    } catch (err) {
+      console.error('Failed to load tutorials:', err);
+      setError('Unable to load videos. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const filtered = activeCategory === 'All'
-    ? tutorials
-    : tutorials.filter((t) => t.category === activeCategory);
+  useEffect(() => {
+    fetchVideos();
+  }, [fetchVideos]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (playing) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [playing]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50/30 to-white dark:from-dark-bg dark:to-dark-card">
       <div className="section-container">
+        {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <h1 className="section-title">🎓 {tt.title}</h1>
+          <h1 className="section-title">🎓 Farming Tutorials</h1>
           <p className="section-subtitle">
-            {tt.subtitle}
+            Learn modern farming techniques through expert video tutorials from Bansi Gir Gaushala
           </p>
         </motion.div>
 
-        {/* Featured Tutorial Video */}
+        {/* Featured Playlist Player */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -56,59 +175,86 @@ export default function Tutorials() {
             <div className="aspect-video">
               <iframe
                 className="w-full h-full"
-                src="https://www.youtube.com/embed/wO8ERhClRjY"
-                title="FarmLytics Tutorials"
+                src="https://www.youtube.com/embed/videoseries?list=UU9OoW-ceIDeJLBVX37gBCww"
+                title="FarmLytics Tutorials Playlist"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             </div>
           </div>
+          <p className="text-xs text-gray-400 text-center mt-3">
+            ▶ Full playlist — use controls above to browse all videos
+          </p>
         </motion.div>
 
-        {/* Category Tabs */}
-        <div className="flex flex-wrap gap-2 justify-center mb-10">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
-                activeCategory === cat
-                  ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
-                  : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 border border-gray-200 dark:border-dark-border'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+        {/* Section Title */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex items-center justify-between mb-6"
+        >
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            📹 Latest Videos
+            {!loading && <span className="text-sm font-normal text-gray-400">({videos.length})</span>}
+          </h2>
+          <button
+            onClick={fetchVideos}
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-border transition-colors disabled:opacity-50"
+          >
+            <HiRefresh className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </motion.div>
 
-        {/* Tutorial Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((tutorial, i) => (
-            <motion.div
-              key={tutorial.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <TutorialCard tutorial={tutorial} />
-            </motion.div>
-          ))}
-        </div>
-
-        {filtered.length === 0 && (
-          <div className="text-center py-16">
-            <span className="text-5xl mb-4 block">📹</span>
-            <p className="text-gray-500 dark:text-gray-400">{tt.noTutorials}</p>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-primary-400 border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-gray-500 dark:text-gray-400">Loading videos from YouTube...</p>
           </div>
         )}
 
-        {/* Note */}
-        <p className="text-xs text-gray-400 text-center mt-8">
-          ℹ️ {tt.note}
-        </p>
+        {/* Error State */}
+        {error && !loading && (
+          <div className="text-center py-16">
+            <span className="text-5xl mb-4 block">⚠️</span>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">{error}</p>
+            <button
+              onClick={fetchVideos}
+              className="px-5 py-2 bg-primary-500 text-white rounded-xl text-sm font-medium hover:bg-primary-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Video Grid */}
+        {!loading && !error && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {videos.map((video, i) => (
+              <VideoCard
+                key={video.videoId}
+                video={video}
+                index={i}
+                onPlay={setPlaying}
+              />
+            ))}
+          </div>
+        )}
+
+        {!loading && !error && videos.length === 0 && (
+          <div className="text-center py-16">
+            <span className="text-5xl mb-4 block">📹</span>
+            <p className="text-gray-500 dark:text-gray-400">No videos available at the moment.</p>
+          </div>
+        )}
       </div>
+
+      {/* Video Player Modal */}
+      {playing && <VideoModal video={playing} onClose={() => setPlaying(null)} />}
     </div>
   );
 }

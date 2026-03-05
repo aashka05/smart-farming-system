@@ -3,11 +3,40 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const bcrypt = require('bcryptjs');
 
 // Load environment variables BEFORE importing db (pool reads process.env)
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const pool = require('./config/db');
+
+// Seed the default admin user (idempotent)
+async function seedAdmin() {
+  try {
+    const email = 'farmlyticswork@gmail.com';
+    const existing = await pool.query('SELECT id, role FROM farmers WHERE email = $1', [email]);
+    if (existing.rows.length > 0) {
+      // Ensure existing row has admin role
+      if (existing.rows[0].role !== 'admin') {
+        await pool.query('UPDATE farmers SET role = $1 WHERE email = $2', ['admin', email]);
+        console.log('✅ Existing admin user role updated');
+      } else {
+        console.log('✅ Admin user already exists');
+      }
+      return;
+    }
+    const salt = await bcrypt.genSalt(12);
+    const hash = await bcrypt.hash('farmlytics123', salt);
+    await pool.query(
+      `INSERT INTO farmers (full_name, email, phone, password_hash, role, created_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())`,
+      ['FarmLytics Admin', email, '9427107324', hash, 'admin']
+    );
+    console.log('✅ Default admin user seeded (farmlyticswork@gmail.com / farmlytics123)');
+  } catch (err) {
+    console.log('⚠️  Could not seed admin user:', err.message);
+  }
+}
 
 // Test PostgreSQL connection (non-blocking) & sync sequences
 pool.query('SELECT 1', (err) => {
@@ -30,6 +59,29 @@ pool.query('SELECT 1', (err) => {
       (colErr) => {
         if (colErr) console.log('⚠️  Could not ensure reset columns:', colErr.message);
         else console.log('✅ reset_token columns ready');
+      }
+    );
+
+    // Ensure role column exists (idempotent), then seed admin
+    pool.query(
+      `ALTER TABLE farmers ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'farmer'`,
+      (roleErr) => {
+        if (roleErr) console.log('⚠️  Could not ensure role column:', roleErr.message);
+        else {
+          console.log('✅ role column ready');
+          seedAdmin();
+        }
+      }
+    );
+
+    // Make disease_detections & chatbot_logs flexible for real-time logging
+    pool.query(
+      `ALTER TABLE disease_detections ALTER COLUMN field_id DROP NOT NULL;
+       ALTER TABLE disease_detections ADD COLUMN IF NOT EXISTS farmer_id INTEGER;
+       ALTER TABLE chatbot_logs ALTER COLUMN farmer_id DROP NOT NULL`,
+      (flexErr) => {
+        if (flexErr) console.log('⚠️  Could not alter detection/chat tables:', flexErr.message);
+        else console.log('✅ disease_detections & chatbot_logs schema updated');
       }
     );
   }
@@ -58,6 +110,7 @@ app.use('/api/translate', require('./routes/translateRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/crop-health', require('./routes/cropHealthRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 // --------------- Health Check ---------------
 app.get('/api/health', (req, res) => {

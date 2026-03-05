@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
-export default function FeatureCard({ icon, title, description, delay = 0 }) {
-  return (
+export default function FeatureCard({ icon, title, description, delay = 0, link }) {
+  const card = (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
-      className="glass-card-hover p-6 group cursor-pointer"
+      className="glass-card-hover p-6 group cursor-pointer h-full"
     >
       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/40 dark:to-primary-800/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
         <span className="text-2xl">{icon}</span>
@@ -20,4 +21,6 @@ export default function FeatureCard({ icon, title, description, delay = 0 }) {
       </p>
     </motion.div>
   );
+
+  return link ? <Link to={link} className="block">{card}</Link> : card;
 }

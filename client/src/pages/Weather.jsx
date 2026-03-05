@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from '../utils/useTranslation';
 
 const defaultWeatherData = {
-  city: 'Vadodara',
+  city: 'Anand',
   temperature: { current: 0, min: 0, max: 0, unit: '°C' },
   humidity: 0,
   rainProbability: 0,
@@ -25,7 +25,7 @@ const weatherAlerts = [
   { severity: 'low', message: 'Moderate humidity levels. Good conditions for transplanting seedlings.', time: '1 hour ago' },
 ];
 
-const cities = ['Ahmedabad', 'Mumbai', 'Delhi', 'Jaipur', 'Lucknow', 'Pune', 'Nagpur', 'Bhopal', 'Surat', 'Rajkot'];
+const cities = ['Anand', 'Ahmedabad', 'Mumbai', 'Delhi', 'Jaipur', 'Lucknow', 'Pune', 'Nagpur', 'Bhopal', 'Surat', 'Rajkot'];
 
 // Map city names to approximate coordinates
 const cityCoords = {
@@ -39,6 +39,7 @@ const cityCoords = {
   'bhopal': { lat: 23.2599, lon: 77.4126 },
   'surat': { lat: 21.1702, lon: 72.8311 },
   'rajkot': { lat: 22.3039, lon: 70.8022 },
+  'anand': { lat: 22.5645, lon: 72.9289 },
   'vadodara': { lat: 22.3072, lon: 73.1812 },
 };
 
@@ -61,7 +62,7 @@ function getCondition(temp, rain) {
 }
 
 export default function Weather() {
-  const [city, setCity] = useState('Vadodara');
+  const [city, setCity] = useState('Anand');
   const [searchInput, setSearchInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [weatherData, setWeatherData] = useState(defaultWeatherData);
