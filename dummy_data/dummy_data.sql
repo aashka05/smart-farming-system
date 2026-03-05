@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict bG13lHWEq30YfoeAS3iNMCxCfeTvMr46tNm7trpaZGr4BjgHBjkVXKZgotddg3A
+\restrict B1QPsRkHGPSEEGcG8S6dRu04r4qTK4uHkgHANRboeTTFvjIxjdtQFWAOA5WgsNF
 
 -- Dumped from database version 16.13 (Homebrew)
 -- Dumped by pg_dump version 16.13 (Homebrew)
@@ -106,9 +106,11 @@ CREATE TABLE public.farmers (
     id integer NOT NULL,
     full_name character varying(100) NOT NULL,
     email character varying(150) NOT NULL,
-    phone character varying(15) NOT NULL,
+    phone character varying(15),
     password_hash text NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    reset_token text,
+    reset_token_expires timestamp with time zone
 );
 
 
@@ -224,6 +226,47 @@ ALTER SEQUENCE public.sensor_data_id_seq OWNED BY public.sensor_data.id;
 
 
 --
+-- Name: test_sensor_data; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.test_sensor_data (
+    id bigint NOT NULL,
+    station_id integer NOT NULL,
+    air_temperature_c numeric(5,2) NOT NULL,
+    air_humidity_percent numeric(5,2) NOT NULL,
+    soil_moisture_percent integer NOT NULL,
+    soil_temperature_c numeric(5,2) NOT NULL,
+    rainfall_mm numeric(6,2) DEFAULT 0,
+    wind_speed_mps numeric(6,2) NOT NULL,
+    wind_direction_deg integer NOT NULL,
+    recorded_at timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.test_sensor_data OWNER TO postgres;
+
+--
+-- Name: test_sensor_data_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.test_sensor_data_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.test_sensor_data_id_seq OWNER TO postgres;
+
+--
+-- Name: test_sensor_data_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.test_sensor_data_id_seq OWNED BY public.test_sensor_data.id;
+
+
+--
 -- Name: weather_stations; Type: TABLE; Schema: public; Owner: sfs_admin1
 --
 
@@ -293,6 +336,13 @@ ALTER TABLE ONLY public.fields ALTER COLUMN id SET DEFAULT nextval('public.field
 --
 
 ALTER TABLE ONLY public.sensor_data ALTER COLUMN id SET DEFAULT nextval('public.sensor_data_id_seq'::regclass);
+
+
+--
+-- Name: test_sensor_data id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.test_sensor_data ALTER COLUMN id SET DEFAULT nextval('public.test_sensor_data_id_seq'::regclass);
 
 
 --
@@ -387,22 +437,23 @@ COPY public.disease_detections (id, field_id, image_url, detected_disease, confi
 -- Data for Name: farmers; Type: TABLE DATA; Schema: public; Owner: sfs_admin1
 --
 
-COPY public.farmers (id, full_name, email, phone, password_hash, created_at) FROM stdin;
-1	Rajesh Kumar	rajesh.kumar@email.com	+919876543201	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop01	2024-01-10 08:00:00
-2	Priya Sharma	priya.sharma@email.com	+919876543202	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop02	2024-01-15 09:00:00
-3	Amit Patel	amit.patel@email.com	+919876543203	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop03	2024-01-20 10:00:00
-4	Sunita Devi	sunita.devi@email.com	+919876543204	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop04	2024-02-01 08:30:00
-5	Vijay Singh	vijay.singh@email.com	+919876543205	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop05	2024-02-05 07:45:00
-6	Meena Yadav	meena.yadav@email.com	+919876543206	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop06	2024-02-10 09:15:00
-7	Suresh Reddy	suresh.reddy@email.com	+919876543207	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop07	2024-02-14 11:00:00
-8	Anita Verma	anita.verma@email.com	+919876543208	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop08	2024-02-20 08:00:00
-9	Mahesh Gupta	mahesh.gupta@email.com	+919876543209	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop09	2024-03-01 10:30:00
-10	Kavita Joshi	kavita.joshi@email.com	+919876543210	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop10	2024-03-05 09:00:00
-11	Ravi Tiwari	ravi.tiwari@email.com	+919876543211	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop11	2024-03-10 07:00:00
-12	Geeta Nair	geeta.nair@email.com	+919876543212	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop12	2024-03-15 08:45:00
-13	Deepak Mishra	deepak.mishra@email.com	+919876543213	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop13	2024-03-20 09:30:00
-14	Rekha Chauhan	rekha.chauhan@email.com	+919876543214	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop14	2024-03-25 10:00:00
-15	Naresh Patil	naresh.patil@email.com	+919876543215	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop15	2024-04-01 08:00:00
+COPY public.farmers (id, full_name, email, phone, password_hash, created_at, reset_token, reset_token_expires) FROM stdin;
+1	Rajesh Kumar	rajesh.kumar@email.com	+919876543201	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop01	2024-01-10 08:00:00	\N	\N
+2	Priya Sharma	priya.sharma@email.com	+919876543202	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop02	2024-01-15 09:00:00	\N	\N
+3	Amit Patel	amit.patel@email.com	+919876543203	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop03	2024-01-20 10:00:00	\N	\N
+4	Sunita Devi	sunita.devi@email.com	+919876543204	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop04	2024-02-01 08:30:00	\N	\N
+5	Vijay Singh	vijay.singh@email.com	+919876543205	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop05	2024-02-05 07:45:00	\N	\N
+6	Meena Yadav	meena.yadav@email.com	+919876543206	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop06	2024-02-10 09:15:00	\N	\N
+7	Suresh Reddy	suresh.reddy@email.com	+919876543207	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop07	2024-02-14 11:00:00	\N	\N
+8	Anita Verma	anita.verma@email.com	+919876543208	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop08	2024-02-20 08:00:00	\N	\N
+9	Mahesh Gupta	mahesh.gupta@email.com	+919876543209	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop09	2024-03-01 10:30:00	\N	\N
+10	Kavita Joshi	kavita.joshi@email.com	+919876543210	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop10	2024-03-05 09:00:00	\N	\N
+11	Ravi Tiwari	ravi.tiwari@email.com	+919876543211	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop11	2024-03-10 07:00:00	\N	\N
+12	Geeta Nair	geeta.nair@email.com	+919876543212	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop12	2024-03-15 08:45:00	\N	\N
+13	Deepak Mishra	deepak.mishra@email.com	+919876543213	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop13	2024-03-20 09:30:00	\N	\N
+14	Rekha Chauhan	rekha.chauhan@email.com	+919876543214	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop14	2024-03-25 10:00:00	\N	\N
+15	Naresh Patil	naresh.patil@email.com	+919876543215	$2b$12$abcdefghijklmnopqrstuuVwXyZ0123456789abcdefghijklmnop15	2024-04-01 08:00:00	\N	\N
+16	aashka	a@a.com	\N	$2a$12$QI8KA1VkDy4n.zZUO5VrfeOdLcvSiiQvuOFHUcrvMjv60lpvfrA2S	2026-03-04 17:25:22.481469	\N	\N
 \.
 
 
@@ -7653,6 +7704,140 @@ COPY public.sensor_data (id, station_id, air_temperature_c, air_humidity_percent
 
 
 --
+-- Data for Name: test_sensor_data; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.test_sensor_data (id, station_id, air_temperature_c, air_humidity_percent, soil_moisture_percent, soil_temperature_c, rainfall_mm, wind_speed_mps, wind_direction_deg, recorded_at) FROM stdin;
+1	100	27.00	63.00	21752	26.69	0.00	0.00	135	2026-03-03 18:08:57
+2	100	27.00	63.00	21925	26.69	0.00	0.00	135	2026-03-03 18:18:57
+3	100	27.00	63.00	22125	26.69	0.00	0.00	135	2026-03-03 18:28:57
+4	100	27.00	63.00	23139	26.75	0.00	0.00	135	2026-03-03 19:08:58
+5	100	27.00	63.00	23464	26.75	0.00	0.00	135	2026-03-03 19:18:58
+6	100	27.00	63.00	23851	26.75	0.00	0.00	135	2026-03-03 19:28:58
+7	100	27.00	63.00	24247	26.75	0.00	0.00	135	2026-03-03 19:38:59
+8	100	27.00	63.00	24712	26.75	0.00	0.00	135	2026-03-03 19:48:59
+9	100	27.00	63.00	25219	26.81	0.00	0.00	135	2026-03-03 19:58:59
+10	100	27.00	63.00	25773	26.81	0.00	0.00	135	2026-03-03 20:08:57
+11	100	27.00	63.00	26248	26.88	0.00	0.00	135	2026-03-03 20:18:57
+12	100	27.00	63.00	27169	26.88	0.00	0.00	135	2026-03-03 20:28:57
+13	100	27.00	63.00	28102	26.94	0.00	0.00	135	2026-03-03 20:38:59
+14	100	27.00	63.00	28460	27.00	0.00	0.00	135	2026-03-03 20:48:59
+15	100	27.00	63.00	29309	27.00	0.00	0.00	135	2026-03-03 20:58:59
+16	100	27.00	64.00	30434	27.00	0.00	0.00	135	2026-03-03 21:08:59
+17	100	27.00	64.00	30878	27.06	0.00	0.00	135	2026-03-03 21:18:59
+18	100	27.00	64.00	32314	27.06	0.00	0.00	135	2026-03-03 21:28:59
+19	100	27.00	64.00	33528	27.13	0.00	0.00	135	2026-03-03 21:38:59
+20	100	27.00	64.00	34765	27.13	0.00	0.00	135	2026-03-03 21:48:59
+21	100	27.00	64.00	36865	27.13	0.00	0.00	135	2026-03-03 21:58:59
+22	100	27.00	64.00	38075	27.13	0.00	0.00	135	2026-03-03 22:08:59
+23	100	27.00	64.00	39349	27.13	0.00	0.00	135	2026-03-03 22:18:59
+24	100	27.00	65.00	40819	27.13	0.00	0.00	135	2026-03-03 22:28:59
+25	100	27.00	65.00	51502	27.19	0.00	0.00	135	2026-03-03 23:08:58
+26	100	27.00	65.00	55958	27.19	0.00	0.00	135	2026-03-03 23:18:58
+27	100	27.00	65.00	58040	27.19	0.00	0.00	135	2026-03-03 23:28:58
+28	100	27.00	64.00	61986	27.25	0.00	0.00	135	2026-03-03 23:38:59
+29	100	27.00	64.00	66561	27.25	0.00	0.00	135	2026-03-03 23:48:59
+30	100	27.00	63.00	70157	27.25	0.00	0.00	135	2026-03-03 23:58:59
+31	100	27.00	60.00	1355333	27.25	0.00	0.00	135	2026-03-04 14:09:00
+32	100	27.00	60.00	4541111	27.25	0.00	0.00	135	2026-03-04 14:19:00
+33	100	27.00	59.00	3403333	27.25	0.00	0.00	135	2026-03-04 14:29:00
+34	100	28.00	62.00	1067895	27.44	0.00	0.00	135	2026-03-04 15:39:00
+35	100	28.00	62.00	1270000	27.44	0.00	0.00	135	2026-03-04 15:49:00
+36	100	28.00	62.00	2399412	27.50	0.00	0.00	135	2026-03-04 15:59:00
+37	100	28.00	62.00	965238	27.50	0.00	0.00	135	2026-03-04 16:09:00
+38	100	28.00	62.00	1452857	27.50	0.00	0.00	135	2026-03-04 16:19:00
+39	100	28.00	62.00	1565385	27.56	0.00	0.00	135	2026-03-04 16:29:00
+40	100	28.00	62.00	1270000	27.56	0.00	0.00	135	2026-03-04 16:39:00
+41	100	28.00	62.00	1770870	27.56	0.00	0.00	135	2026-03-04 16:49:00
+42	100	28.00	62.00	1311290	27.56	0.00	0.00	135	2026-03-04 16:59:00
+43	100	28.00	61.00	1270000	27.63	0.00	0.00	135	2026-03-04 17:09:00
+44	100	28.00	61.00	1565385	27.63	0.00	0.00	135	2026-03-04 17:19:00
+45	100	28.00	61.00	1355333	27.63	0.00	0.00	135	2026-03-04 17:29:00
+46	100	28.00	62.00	3140769	27.63	0.00	0.00	135	2026-03-04 17:39:01
+47	100	28.00	62.00	1696667	27.63	0.00	0.00	135	2026-03-04 17:49:01
+48	100	28.00	62.00	3403333	27.69	0.00	0.00	135	2026-03-04 17:59:01
+49	100	28.00	63.00	2550000	27.69	0.00	0.00	135	2026-03-04 18:09:01
+50	100	28.00	63.00	1696667	27.69	0.00	0.00	135	2026-03-04 18:19:01
+51	100	28.00	63.00	1355333	27.75	0.00	0.00	135	2026-03-04 18:29:01
+52	100	28.00	63.00	777692	27.75	0.00	0.00	135	2026-03-04 18:39:04
+53	100	28.00	63.00	1270000	27.81	0.00	0.00	135	2026-03-04 18:49:04
+54	100	28.00	63.00	2265556	27.81	0.00	0.00	135	2026-03-04 18:59:04
+55	100	28.00	63.00	1355333	27.81	0.00	0.00	135	2026-03-04 19:08:37
+56	100	28.00	63.00	861489	27.81	0.00	0.00	135	2026-03-04 19:18:37
+57	100	28.00	63.00	1194706	27.81	0.00	0.00	135	2026-03-04 19:28:37
+58	100	28.00	64.00	861489	27.81	0.00	0.00	135	2026-03-04 19:38:47
+59	100	28.00	64.00	1311290	27.81	0.00	0.00	135	2026-03-04 19:48:47
+60	100	28.00	64.00	843333	27.81	0.00	0.00	135	2026-03-04 19:58:47
+61	100	28.00	64.00	1270000	27.88	0.00	0.00	135	2026-03-04 20:09:02
+62	100	28.00	64.00	1311290	27.88	0.00	0.00	135	2026-03-04 20:19:02
+63	100	28.00	64.00	1696667	27.88	0.00	0.00	135	2026-03-04 20:29:02
+64	100	28.00	64.00	1355333	27.88	0.00	0.00	135	2026-03-04 20:39:10
+65	100	28.00	64.00	1402414	27.88	0.00	0.00	135	2026-03-04 20:49:10
+66	100	28.00	64.00	965238	27.88	0.00	0.00	135	2026-03-04 20:59:10
+67	100	28.00	64.00	1311290	27.88	0.00	0.00	135	2026-03-04 21:09:01
+68	100	28.00	64.00	1452857	27.88	0.00	0.00	135	2026-03-04 21:19:01
+69	100	28.00	64.00	809200	27.88	0.00	0.00	135	2026-03-04 21:29:01
+70	100	28.00	64.00	1355333	27.88	0.00	0.00	135	2026-03-04 21:39:01
+71	100	28.00	65.00	1270000	27.88	0.00	0.00	135	2026-03-04 21:49:01
+72	100	28.00	65.00	1507037	27.88	0.00	0.00	135	2026-03-04 21:59:01
+73	100	28.00	65.00	809200	27.94	0.00	0.00	135	2026-03-04 22:09:08
+74	100	28.00	65.00	900222	27.88	0.00	0.00	135	2026-03-04 22:19:08
+75	100	28.00	65.00	1014000	27.94	0.00	0.00	135	2026-03-04 22:29:08
+76	100	28.00	65.00	942558	27.94	0.00	0.00	135	2026-03-04 22:39:17
+77	100	28.00	65.00	1311290	27.94	0.00	0.00	135	2026-03-04 22:49:17
+78	100	28.00	65.00	4086000	27.94	0.00	0.00	135	2026-03-04 22:59:17
+79	100	28.00	65.00	1565385	27.94	0.00	0.00	135	2026-03-04 23:38:39
+80	100	28.00	65.00	843333	27.94	0.00	0.00	135	2026-03-04 23:48:39
+81	100	28.00	65.00	1355333	27.94	0.00	0.00	135	2026-03-04 23:58:39
+82	100	28.00	65.00	1402414	27.94	0.00	0.00	135	2026-03-05 01:09:02
+83	100	28.00	65.00	3403333	27.88	0.00	0.00	135	2026-03-05 01:19:02
+84	100	28.00	65.00	5110000	27.88	0.00	0.00	135	2026-03-05 01:29:02
+85	100	28.00	65.00	2915714	27.88	0.00	0.00	135	2026-03-05 01:38:39
+86	100	28.00	65.00	1696667	27.88	0.00	0.00	135	2026-03-05 01:48:39
+87	100	28.00	65.00	2550000	27.88	0.00	0.00	135	2026-03-05 01:58:39
+88	100	28.00	65.00	1270000	27.88	0.00	0.00	135	2026-03-05 02:09:03
+89	100	28.00	65.00	1311290	27.81	0.00	0.00	135	2026-03-05 02:19:03
+90	100	28.00	65.00	1311290	27.81	0.00	0.00	135	2026-03-05 02:29:03
+91	100	28.00	65.00	1270000	27.81	0.00	0.00	135	2026-03-05 02:39:06
+92	100	28.00	65.00	1231212	27.81	0.00	0.00	135	2026-03-05 02:49:06
+93	100	28.00	65.00	861489	27.81	0.00	0.00	135	2026-03-05 02:59:06
+94	100	27.00	63.00	1452857	27.06	0.00	0.00	135	2026-03-05 09:09:00
+95	100	27.00	63.00	1270000	27.13	0.00	0.00	135	2026-03-05 09:19:00
+96	100	27.00	63.00	1940476	27.13	0.00	0.00	135	2026-03-05 09:29:00
+97	100	27.00	61.00	2550000	27.13	0.00	0.00	135	2026-03-05 10:09:02
+98	100	27.00	61.00	206	27.13	0.00	0.00	135	2026-03-05 10:19:02
+99	100	27.00	61.00	1402414	27.13	0.00	0.00	135	2026-03-05 10:29:02
+100	100	27.00	63.00	1121	27.38	0.00	0.01	225	2026-03-05 15:39:02
+101	100	27.00	63.00	1112	27.44	0.00	0.01	225	2026-03-05 15:49:02
+102	100	27.00	62.00	1130	27.56	0.00	0.01	225	2026-03-05 15:59:02
+103	100	27.00	60.00	1124	27.56	0.00	0.01	225	2026-03-05 16:09:01
+104	100	27.00	58.00	1149	27.44	0.00	0.01	225	2026-03-05 16:19:01
+105	100	27.00	58.00	1149	27.31	0.00	0.01	225	2026-03-05 16:29:01
+106	100	27.00	58.00	1155	27.25	0.00	0.01	225	2026-03-05 16:39:01
+107	100	27.00	58.00	1216	27.13	0.00	0.01	225	2026-03-05 16:49:01
+108	100	27.00	58.00	1146	27.13	0.28	0.01	225	2026-03-05 16:59:01
+109	100	29.00	62.00	1143	27.75	0.00	0.01	270	2026-03-05 17:39:02
+110	100	29.00	58.00	1146	27.50	0.00	0.02	225	2026-03-05 17:49:02
+111	100	28.00	59.00	1152	27.50	0.00	0.01	225	2026-03-05 17:59:02
+112	100	27.00	65.00	12756	26.81	0.00	0.00	135	2026-03-03 01:08:42
+113	100	27.00	65.00	12806	26.81	0.00	0.00	135	2026-03-03 01:18:42
+114	100	27.00	65.00	12857	26.81	0.00	0.00	135	2026-03-03 01:28:42
+115	100	27.00	65.00	12756	26.81	0.00	0.00	135	2026-03-03 01:08:42
+116	100	27.00	65.00	12806	26.81	0.00	0.00	135	2026-03-03 01:18:42
+117	100	27.00	65.00	12857	26.81	0.00	0.00	135	2026-03-03 01:28:42
+118	100	27.00	65.00	12756	26.81	0.00	0.00	135	2026-03-03 01:08:42
+119	100	27.00	65.00	12806	26.81	0.00	0.00	135	2026-03-03 01:18:42
+120	100	27.00	65.00	12857	26.81	0.00	0.00	135	2026-03-03 01:28:42
+121	100	27.00	65.00	12756	26.81	0.00	0.00	135	2026-03-03 01:08:42
+122	100	27.00	65.00	12806	26.81	0.00	0.00	135	2026-03-03 01:18:42
+123	100	27.00	65.00	12857	26.81	0.00	0.00	135	2026-03-03 01:28:42
+124	100	27.00	65.00	12756	26.81	0.00	0.00	135	2026-03-03 01:08:42
+125	100	27.00	65.00	12806	26.81	0.00	0.00	135	2026-03-03 01:18:42
+126	100	27.00	65.00	12857	26.81	0.00	0.00	135	2026-03-03 01:28:42
+\.
+
+
+--
 -- Data for Name: weather_stations; Type: TABLE DATA; Schema: public; Owner: sfs_admin1
 --
 
@@ -7708,7 +7893,7 @@ SELECT pg_catalog.setval('public.disease_detections_id_seq', 1, false);
 -- Name: farmers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: sfs_admin1
 --
 
-SELECT pg_catalog.setval('public.farmers_id_seq', 1, false);
+SELECT pg_catalog.setval('public.farmers_id_seq', 17, false);
 
 
 --
@@ -7723,6 +7908,13 @@ SELECT pg_catalog.setval('public.fields_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.sensor_data_id_seq', 1, false);
+
+
+--
+-- Name: test_sensor_data_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.test_sensor_data_id_seq', 126, true);
 
 
 --
@@ -7789,6 +7981,14 @@ ALTER TABLE ONLY public.sensor_data
 
 
 --
+-- Name: test_sensor_data test_sensor_data_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.test_sensor_data
+    ADD CONSTRAINT test_sensor_data_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: weather_stations weather_stations_gsm_number_key; Type: CONSTRAINT; Schema: public; Owner: sfs_admin1
 --
 
@@ -7845,8 +8045,22 @@ ALTER TABLE ONLY public.weather_stations
 
 
 --
+-- Name: TABLE test_sensor_data; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.test_sensor_data TO sfs_admin1;
+
+
+--
+-- Name: SEQUENCE test_sensor_data_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,USAGE ON SEQUENCE public.test_sensor_data_id_seq TO sfs_admin1;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict bG13lHWEq30YfoeAS3iNMCxCfeTvMr46tNm7trpaZGr4BjgHBjkVXKZgotddg3A
+\unrestrict B1QPsRkHGPSEEGcG8S6dRu04r4qTK4uHkgHANRboeTTFvjIxjdtQFWAOA5WgsNF
 
