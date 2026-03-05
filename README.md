@@ -70,3 +70,37 @@ SERP_API =
 MONGO_URI = 
 (GET IT FROM https://www.mongodb.com/) 
 
+## Fetch Realtime Data
+### Linux / macOS (Cron)
+1. Open crontab:
+```bash
+crontab -e
+```
+2. Add the job (example: run every 30 minutes):
+```bash
+*/30 * * * * /full/path/to/python /full/path/to/store_in_db.py
+```
+3. If using **vim**:
+- Press `Esc`
+- Type `:wq`
+- Press `Enter`
+4. Verify the cron job:
+```bash
+crontab -l
+```
+---
+### Windows (Using Task Scheduler)
+1. Open **Task Scheduler**.
+2. Click **Create Basic Task**.
+3. Give the task a name (e.g., `Run Python Script`).
+4. Choose the trigger (**Daily / At startup / Repeat every X minutes**).
+5. Select **Start a Program**.
+**Program/script:**
+```
+C:\Python39\python.exe
+```
+**Add arguments:**
+```
+C:\path\to\script.py
+```
+6. Click **Finish** to create the scheduled task.
