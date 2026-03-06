@@ -1,7 +1,7 @@
 ///PLEASE ADD PROTECTED ROUTER TO THIS PAGE AGAIN , IT WAS REMOVED FOR TESTING.
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HiPaperAirplane, HiLightBulb, HiChatAlt2, HiPlus, HiClock } from 'react-icons/hi';
+import { HiPaperAirplane, HiLightBulb, HiChatAlt2, HiPlus, HiClock, HiMicrophone } from 'react-icons/hi';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import api from '../services/api';
@@ -106,6 +106,10 @@ export default function AIChatbot() {
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const [transcribing, setTranscribing] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -362,6 +366,79 @@ export default function AIChatbot() {
     }
   }, [input, streaming, activeChatId, user, createSession, authUser]);
 
+  // ---------- Speech to text (Sarvam AI) ----------
+  const SARVAM_API_KEY = import.meta.env.VITE_SARVAM_API_KEY || 'sk_379zwuu8_fE8JeksRofnUNHKGwBWCz5zb';
+
+  const sendAudioToSarvam = async (blob) => {
+    setTranscribing(true);
+    try {
+      const form = new FormData();
+      // filename and content-type will be inferred by browser
+      form.append('file', blob, 'recording.webm');
+
+      const res = await fetch('https://api.sarvam.ai/speech-to-text', {
+        method: 'POST',
+        headers: {
+          'api-subscription-key': SARVAM_API_KEY,
+        },
+        body: form,
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`Sarvam error ${res.status}: ${txt}`);
+      }
+
+      const data = await res.json();
+      // Support multiple possible response shapes
+      const transcript = data?.text || data?.transcript || data?.result || data?.data || '';
+      if (transcript && typeof transcript !== 'object') {
+        setInput((prev) => (prev ? prev + ' ' + transcript : transcript));
+      } else if (typeof transcript === 'object') {
+        // try to stringify common nested shapes
+        const candidate = transcript?.text || transcript?.transcript || '';
+        if (candidate) setInput((prev) => (prev ? prev + ' ' + candidate : candidate));
+      }
+    } catch (err) {
+      console.error('Speech-to-text failed:', err);
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      const mr = new MediaRecorder(stream);
+      mediaRecorderRef.current = mr;
+
+      mr.addEventListener('dataavailable', (e) => {
+        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
+      });
+
+      mr.addEventListener('stop', async () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await sendAudioToSarvam(blob);
+        // stop all tracks
+        stream.getTracks().forEach((t) => t.stop());
+      });
+
+      mr.start();
+      setRecording(true);
+    } catch (err) {
+      console.error('Microphone access denied or unavailable', err);
+    }
+  };
+
+  const stopRecording = () => {
+    const mr = mediaRecorderRef.current;
+    if (mr && mr.state !== 'inactive') {
+      mr.stop();
+    }
+    setRecording(false);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     sendMessage();
@@ -525,7 +602,20 @@ export default function AIChatbot() {
 
             {/* Input — fixed at bottom */}
             <form onSubmit={handleSubmit} className="flex-shrink-0 px-4 py-2.5 border-t border-gray-200 dark:border-dark-border">
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
+                <button
+                  type="button"
+                  onClick={() => (recording ? stopRecording() : startRecording())}
+                  disabled={streaming || transcribing}
+                  className={`p-2 rounded-lg border ${recording ? 'bg-red-100 border-red-300 text-red-600' : 'bg-white dark:bg-dark-card border-gray-200 dark:border-dark-border text-gray-700 dark:text-gray-300'} transition-colors`}
+                  title={recording ? 'Stop recording' : 'Record speech'}
+                >
+                  <div className="flex items-center gap-2">
+                    <HiMicrophone className={`w-5 h-5 ${recording ? 'animate-pulse' : ''}`} />
+                    {recording ? <span className="text-xs">Recording</span> : transcribing ? <span className="text-xs">Transcribing…</span> : null}
+                  </div>
+                </button>
+
                 <input
                   type="text"
                   value={input}

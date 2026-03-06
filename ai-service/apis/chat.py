@@ -1,7 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter , HTTPException, UploadFile
 from fastapi.responses import JSONResponse
-from starlette.responses import StreamingResponse
+from starlette.responses import StreamingResponse 
 from pydantic import BaseModel
+from groq import AsyncGroq
 from typing import Optional
 from geopy.geocoders import Nominatim
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
@@ -25,14 +26,11 @@ _llm = None
 _checkpointer = None
 _agent_available = False
 
-create_chatbot_agent = None  # resolved below if LLM is available
-
 try:
     _api_key = os.getenv("OLLAMA_API_KEY")
     if _api_key and _api_key not in ("", "None"):
         from llm_config import get_llm
         from db import get_checkpointer as _get_cp
-        from agent import create_chatbot_agent
         _llm = get_llm()
         _checkpointer = _get_cp()
         _agent_available = True
@@ -271,41 +269,6 @@ class RequestQuery(BaseModel):
     user_name: str
     language: Optional[str] = "English"
 
-@router.post("/get_chat")
-async def get_chat(chat_id: str):
-    """
-    Fetch chat messages from LangGraph agent state using thread_id.
-    """
-    if not _agent_available or create_chatbot_agent is None or _checkpointer is None:
-        return JSONResponse(
-            status_code=503,
-            content={"error": "Agent not available — LLM not configured"},
-        )
-
-    from prompts import system_prompt as _sp
-    agent = create_chatbot_agent(
-        system_prompt=_sp.format(name="Farmer", location="unknown", language="English"),
-        model=_llm,
-        checkpointer=_checkpointer,
-    )
-
-    state = await agent.aget_state(
-        config={"configurable": {"thread_id": chat_id}}
-    )
-
-    raw_messages = state.values.get("messages", [])
-
-    # Serialize LangChain message objects to plain dicts
-    serialized = []
-    for m in raw_messages:
-        msg_type = type(m).__name__.lower().replace("message", "")  # "human", "ai", "tool"
-        content = m.content if hasattr(m, "content") else str(m)
-        tool_calls = []
-        if hasattr(m, "tool_calls") and m.tool_calls:
-            tool_calls = [{"name": tc.get("name", "")} for tc in m.tool_calls]
-        serialized.append({"type": msg_type, "content": content, "tool_calls": tool_calls})
-
-    return JSONResponse(content={"messages": serialized})
 
 @router.get("/")
 async def health_check():
@@ -330,6 +293,7 @@ async def respond(request: RequestQuery):
             location=location_address,
             language=language,
         )
+        from agent import create_chatbot_agent
         agent = create_chatbot_agent(
             system_prompt=formatted_prompt,
             model=_llm,
@@ -405,8 +369,64 @@ async def respond(request: RequestQuery):
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"},
     )
+class SpeechToText:
+    def __init__(self):
+        self.model : AsyncGroq = AsyncGroq(api_key=os.getenv('GROQ_API_KEY'))
 
+    async def speech_to_text(self , file : UploadFile):
+        if file.content_type not in ("audio/wav" , "audio/x-wav"):
+            raise HTTPException(400 , "Only wav files are supported")
+        audio = await file.read()
+        if(len(audio) <= 1000):
+            return dict(filename = file.filename , text = "")
+        if(len(audio)>10*1024*1024):
+            raise HTTPException(400,"File Size must be less than 10 mb")
+        result = await self.model.audio.transcriptions.create(
+            file = (file.filename , audio),
+            model = "whisper-large-v3-turbo"
+        )
+        return dict(filename = file.filename , text = result.text.strip())
+class SpeechToText:
+    def __init__(self):
+        self.model : AsyncGroq = AsyncGroq(api_key=os.getenv('GROQ_API_KEY'))
 
+    async def speech_to_text(self , file : UploadFile):
+        if file.content_type not in ("audio/wav" , "audio/x-wav"):
+            raise HTTPException(400 , "Only wav files are supported")
+        audio = await file.read()
+        if(len(audio) <= 1000):
+            return dict(filename = file.filename , text = "")
+        if(len(audio)>10*1024*1024):
+            raise HTTPException(400,"File Size must be less than 10 mb")
+        result = await self.model.audio.transcriptions.create(
+            file = (file.filename , audio),
+            model = "whisper-large-v3-turbo"
+        )
+        return dict(filename = file.filename , text = result.text.strip())
+    
+class SpeechToText:
+    def __init__(self):
+        self.model : AsyncGroq = AsyncGroq(api_key=os.getenv('GROQ_API_KEY'))
+
+    async def speech_to_text(self , file : UploadFile):
+        if file.content_type not in ("audio/wav" , "audio/x-wav"):
+            raise HTTPException(400 , "Only wav files are supported")
+        audio = await file.read()
+        if(len(audio) <= 1000):
+            return dict(filename = file.filename , text = "")
+        if(len(audio)>10*1024*1024):
+            raise HTTPException(400,"File Size must be less than 10 mb")
+        result = await self.model.audio.transcriptions.create(
+            file = (file.filename , audio),
+            model = "whisper-large-v3-turbo"
+        )
+        return dict(filename = file.filename , text = result.text.strip())
+@router.post("/stt")
+async def get_text_from_speech(file:UploadFile):
+    st = SpeechToText()
+    response_dict : dict = await st.speech_to_text(file)
+    #response_dict schema (text : str , filename:str) 
+    return JSONResponse(content=response_dict)
 def _chunk_text(text: str, size: int = 8) -> list[str]:
     """Split text into small chunks for streaming effect."""
     words = text.split(" ")
