@@ -274,6 +274,47 @@ class RequestQuery(BaseModel):
 async def health_check():
     return {"message": "Chat service is up and running!"}
 
+def messages_to_dict(messages) -> list[dict]:
+    """Convert LangChain message objects to JSON-serializable dicts."""
+    result = []
+    for msg in messages:
+        entry = {"content": msg.content}
+        if isinstance(msg, HumanMessage):
+            entry["role"] = "user"
+        elif isinstance(msg, AIMessage):
+            entry["role"] = "assistant"
+            if msg.tool_calls:
+                entry["tool_calls"] = msg.tool_calls
+        elif isinstance(msg, ToolMessage):
+            entry["role"] = "tool"
+            entry["name"] = getattr(msg, "name", None)
+        else:
+            entry["role"] = "unknown"
+        result.append(entry)
+    return result
+@router.post("/get_chat")
+async def get_chat(chat_id: str):
+    """
+    Fetch chat messages from LangGraph agent state using thread_id.
+    """
+    if not (_agent_available and _llm):
+        return JSONResponse(content={"messages": []})
+
+    from agent import create_chatbot_agent
+
+    agent = create_chatbot_agent(
+        system_prompt="You are a helpful farming assistant.",
+        model=_llm,
+        checkpointer=_checkpointer,
+    )
+
+    state = await agent.aget_state(
+        config={"configurable": {"thread_id": chat_id}}
+    )
+
+    messages = state.values.get("messages", [])
+
+    return JSONResponse(content={"messages": messages_to_dict(messages)})
 
 @router.post("/query")
 async def respond(request: RequestQuery):
@@ -386,41 +427,7 @@ class SpeechToText:
             model = "whisper-large-v3-turbo"
         )
         return dict(filename = file.filename , text = result.text.strip())
-class SpeechToText:
-    def __init__(self):
-        self.model : AsyncGroq = AsyncGroq(api_key=os.getenv('GROQ_API_KEY'))
 
-    async def speech_to_text(self , file : UploadFile):
-        if file.content_type not in ("audio/wav" , "audio/x-wav"):
-            raise HTTPException(400 , "Only wav files are supported")
-        audio = await file.read()
-        if(len(audio) <= 1000):
-            return dict(filename = file.filename , text = "")
-        if(len(audio)>10*1024*1024):
-            raise HTTPException(400,"File Size must be less than 10 mb")
-        result = await self.model.audio.transcriptions.create(
-            file = (file.filename , audio),
-            model = "whisper-large-v3-turbo"
-        )
-        return dict(filename = file.filename , text = result.text.strip())
-    
-class SpeechToText:
-    def __init__(self):
-        self.model : AsyncGroq = AsyncGroq(api_key=os.getenv('GROQ_API_KEY'))
-
-    async def speech_to_text(self , file : UploadFile):
-        if file.content_type not in ("audio/wav" , "audio/x-wav"):
-            raise HTTPException(400 , "Only wav files are supported")
-        audio = await file.read()
-        if(len(audio) <= 1000):
-            return dict(filename = file.filename , text = "")
-        if(len(audio)>10*1024*1024):
-            raise HTTPException(400,"File Size must be less than 10 mb")
-        result = await self.model.audio.transcriptions.create(
-            file = (file.filename , audio),
-            model = "whisper-large-v3-turbo"
-        )
-        return dict(filename = file.filename , text = result.text.strip())
 @router.post("/stt")
 async def get_text_from_speech(file:UploadFile):
     st = SpeechToText()

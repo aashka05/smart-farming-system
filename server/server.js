@@ -84,6 +84,15 @@ pool.query('SELECT 1', (err) => {
         else console.log('✅ disease_detections & chatbot_logs schema updated');
       }
     );
+
+    // Sync the chatbot_logs id sequence so auto-increment never collides
+    pool.query(
+      `SELECT setval('chatbot_logs_id_seq', COALESCE((SELECT MAX(id) FROM chatbot_logs), 0) + 1, false)`,
+      (seqErr) => {
+        if (seqErr) console.log('⚠️  Could not sync chatbot_logs sequence:', seqErr.message);
+        else console.log('✅ chatbot_logs sequence synced');
+      }
+    );
   }
 });
 

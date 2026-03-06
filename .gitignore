@@ -40,3 +40,7 @@ coverage/
 # Virtual Environment
 venv/
 env/
+
+# Python
+__pycache__/
+*.pyc
