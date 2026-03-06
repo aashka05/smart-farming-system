@@ -6,6 +6,9 @@ Run with:
 """
 
 import uvicorn
+from dotenv import load_dotenv
+load_dotenv()  # Load .env before any router imports that read env vars
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from apis.chat import router as chat_router

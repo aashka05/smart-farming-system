@@ -1,5 +1,22 @@
 const pool = require('../config/db');
 
+// ── Auto-create chat_sessions table ──────────────────────────────────
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS chat_sessions (
+        chat_id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('✅ chat_sessions table ready');
+  } catch (err) {
+    console.error('⚠️  chat_sessions table creation error:', err.message);
+  }
+})();
+
 // @desc    Log a chat interaction to the database
 // @route   POST /api/chat/log
 // @access  Private
@@ -84,4 +101,62 @@ function generateMockResponse(message) {
   return 'Thank you for your question! As your AI farming assistant, I can help with crop recommendations, weather insights, disease identification, irrigation advice, and market prices. Could you please provide more details about what you need help with?';
 }
 
-module.exports = { chat, getSuggestions, logChat };
+// @desc    Get chat history for logged-in user
+// @route   GET /api/chat/history
+// @access  Private
+const getChatHistory = async (req, res) => {
+  try {
+    const userId = String(req.user?.id);
+    const result = await pool.query(
+      'SELECT chat_id, user_id, title, created_at FROM chat_sessions WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Chat history error:', error.message);
+    res.status(500).json({ message: 'Failed to fetch chat history' });
+  }
+};
+
+// @desc    Create a new chat session
+// @route   POST /api/chat/session
+// @access  Private
+const createChatSession = async (req, res) => {
+  try {
+    const userId = String(req.user?.id);
+    const { title } = req.body;
+    if (!title) return res.status(400).json({ message: 'Title is required' });
+
+    const result = await pool.query(
+      'INSERT INTO chat_sessions (user_id, title) VALUES ($1, $2) RETURNING *',
+      [userId, title.substring(0, 500)]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Create session error:', error.message);
+    res.status(500).json({ message: 'Failed to create chat session' });
+  }
+};
+
+// @desc    Get all chat_ids for the logged-in user
+// @route   GET /api/chat/sessions
+// @access  Private
+const getChatIds = async (req, res) => {
+  try {
+    const userId = String(req.user?.id);
+    const result = await pool.query(
+      'SELECT chat_id, title, created_at FROM chat_sessions WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    res.json({
+      user_id: userId,
+      total: result.rowCount,
+      sessions: result.rows,
+    });
+  } catch (error) {
+    console.error('Get chat IDs error:', error.message);
+    res.status(500).json({ message: 'Failed to fetch chat sessions' });
+  }
+};
+
+module.exports = { chat, getSuggestions, logChat, getChatHistory, createChatSession, getChatIds };

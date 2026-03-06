@@ -25,6 +25,8 @@ import { GiPlantSeed, GiWateringCan } from "react-icons/gi";
 
 const exploreLinks = [
   { to: "/weather", label: "Weather", icon: HiCloud },
+  { to: "/crop-recommendation", label: "Crop Recommendation", icon: GiPlantSeed },
+  { to: "/disease-info", label: "Disease Detection", icon: HiBeaker },
   { to: "/market-prices", label: "Market Prices", icon: HiChartBar },
   { to: "/tutorials", label: "Tutorials", icon: HiAcademicCap },
 ];
@@ -58,6 +60,8 @@ export default function Navbar({ darkMode, setDarkMode }) {
     aboutUs: 'About Us', login: 'Login',
     explore: 'Explore', aiTools: 'AI Tools',
     marketPrices: 'Market Prices',
+    cropRecommendation: 'Crop Recommendation',
+    diseaseDetection: 'Disease Detection',
     diseasePrediction: 'Disease Prediction',
     irrigationAdvisory: 'Irrigation Advisory',
     aiChatbot: 'AI Chatbot',
@@ -65,8 +69,8 @@ export default function Navbar({ darkMode, setDarkMode }) {
   const { t } = useTranslation(navStrings);
 
   const labelMap = {
-    '/': t.home, '/weather': t.weather, '/disease-info': t.disease,
-    '/crop-recommendation': t.crops, '/market-prices': t.marketPrices || t.market,
+    '/': t.home, '/weather': t.weather, '/disease-info': t.diseaseDetection || t.disease,
+    '/crop-recommendation': t.cropRecommendation || t.crops, '/market-prices': t.marketPrices || t.market,
     '/tutorials': t.tutorials, '/about-contact': t.aboutUs,
     '/dashboard/crop-health': t.diseasePrediction,
     '/dashboard/irrigation': t.irrigationAdvisory,

@@ -6,6 +6,8 @@ numpy
 pandas
 pydantic
 python-dotenv
+scikit-learn
+xgboost
 pymongo
 geopy
 google-search-results

@@ -25,11 +25,14 @@ _llm = None
 _checkpointer = None
 _agent_available = False
 
+create_chatbot_agent = None  # resolved below if LLM is available
+
 try:
     _api_key = os.getenv("OLLAMA_API_KEY")
     if _api_key and _api_key not in ("", "None"):
         from llm_config import get_llm
         from db import get_checkpointer as _get_cp
+        from agent import create_chatbot_agent
         _llm = get_llm()
         _checkpointer = _get_cp()
         _agent_available = True
@@ -268,6 +271,41 @@ class RequestQuery(BaseModel):
     user_name: str
     language: Optional[str] = "English"
 
+@router.post("/get_chat")
+async def get_chat(chat_id: str):
+    """
+    Fetch chat messages from LangGraph agent state using thread_id.
+    """
+    if not _agent_available or create_chatbot_agent is None or _checkpointer is None:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "Agent not available — LLM not configured"},
+        )
+
+    from prompts import system_prompt as _sp
+    agent = create_chatbot_agent(
+        system_prompt=_sp.format(name="Farmer", location="unknown", language="English"),
+        model=_llm,
+        checkpointer=_checkpointer,
+    )
+
+    state = await agent.aget_state(
+        config={"configurable": {"thread_id": chat_id}}
+    )
+
+    raw_messages = state.values.get("messages", [])
+
+    # Serialize LangChain message objects to plain dicts
+    serialized = []
+    for m in raw_messages:
+        msg_type = type(m).__name__.lower().replace("message", "")  # "human", "ai", "tool"
+        content = m.content if hasattr(m, "content") else str(m)
+        tool_calls = []
+        if hasattr(m, "tool_calls") and m.tool_calls:
+            tool_calls = [{"name": tc.get("name", "")} for tc in m.tool_calls]
+        serialized.append({"type": msg_type, "content": content, "tool_calls": tool_calls})
+
+    return JSONResponse(content={"messages": serialized})
 
 @router.get("/")
 async def health_check():
@@ -292,7 +330,6 @@ async def respond(request: RequestQuery):
             location=location_address,
             language=language,
         )
-        from agent import create_chatbot_agent
         agent = create_chatbot_agent(
             system_prompt=formatted_prompt,
             model=_llm,

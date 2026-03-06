@@ -1,20 +1,18 @@
 ///PLEASE ADD PROTECTED ROUTER TO THIS PAGE AGAIN , IT WAS REMOVED FOR TESTING.
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HiPaperAirplane, HiLightBulb } from 'react-icons/hi';
+import { HiPaperAirplane, HiLightBulb, HiChatAlt2, HiPlus, HiClock } from 'react-icons/hi';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const AI_SERVICE_URL = 'http://localhost:8000';
 
 const suggestedQuestions = [
   'What crops should I grow this season?',
-  'How to prevent leaf blight in rice?',
-  'When is the best time to irrigate wheat?',
-  'What is the current market price of cotton?',
-  'How to improve soil fertility naturally?',
-  'Best organic pesticides for vegetables?',
+  'How to improve soil fertility?',
+  'Current market price of wheat?',
 ];
 
 /* ── Friendly labels for tool names ── */
@@ -90,18 +88,47 @@ const ToolCallPill = ({ toolName }) => {
 
 
 export default function AIChatbot() {
-  const [messages, setMessages] = useState([
-    {
-      role: 'bot',
-      text: 'Hello! 🌾 I\'m **Agronex**, your AI Farming Assistant. Ask me anything about crops, weather, diseases, market prices, or irrigation.\n\nHow can I help you today?',
-      toolCalls: [],
-    },
-  ]);
+  const { user: authUser } = useAuth();
+
+  // Dynamic user from auth context (TASK 4)
+  const user = {
+    _id: authUser?.id ? String(authUser.id) : 'anonymous',
+    name: authUser?.name || 'Farmer',
+    language: authUser?.language || 'English',
+  };
+
+  const WELCOME_MESSAGE = {
+    role: 'bot',
+    text: `Hello${user.name !== 'Farmer' ? `, ${user.name}` : ''}! 🌾 I'm **Agronex**, your AI Farming Assistant. Ask me anything about crops, weather, diseases, market prices, or irrigation.\n\nHow can I help you today?`,
+    toolCalls: [],
+  };
+
+  const [messages, setMessages] = useState([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
+  const [activeChatId, setActiveChatId] = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const chatContainerRef = useRef(null);
   const abortRef = useRef(null);
   const userScrolledUp = useRef(false);
+
+  // ── Fetch chat history on mount (TASK 1 + 3) ──
+  useEffect(() => {
+    if (!authUser) return;
+    const fetchHistory = async () => {
+      setHistoryLoading(true);
+      try {
+        const { data } = await api.get('/chat/history');
+        setChatHistory(data);
+      } catch {
+        // Silently fail — history is optional
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+    fetchHistory();
+  }, [authUser]);
 
   // Track whether user manually scrolled up
   const handleScroll = useCallback(() => {
@@ -129,13 +156,77 @@ export default function AIChatbot() {
     }
   }, [messages.length, scrollToBottom]);
 
+  // ── Create a new chat session (TASK 3) ──
+  const createSession = useCallback(async (title) => {
+    try {
+      const { data } = await api.post('/chat/session', { title: title.substring(0, 80) });
+      setChatHistory((prev) => [data, ...prev]);
+      setActiveChatId(data.chat_id);
+      return data.chat_id;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // ── Start a new chat ──
+  const handleNewChat = useCallback(() => {
+    setActiveChatId(null);
+    setMessages([WELCOME_MESSAGE]);
+    setInput('');
+  }, [user.name]);
+
+  // ── Load a previous chat session — fetches real messages from AI service ──
+  const handleLoadChat = useCallback(async (session) => {
+    setActiveChatId(session.chat_id);
+    setMessages([{ role: 'bot', text: '⏳ Loading conversation...', toolCalls: [] }]);
+
+    try {
+      const res = await fetch(
+        `${AI_SERVICE_URL}/chat/get_chat?chat_id=${encodeURIComponent(String(session.chat_id))}`,
+        { method: 'POST' }
+      );
+
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+
+      const { messages: rawMessages } = await res.json();
+
+      if (!rawMessages || rawMessages.length === 0) {
+        setMessages([{ role: 'bot', text: `📂 **${session.title}**\n\nNo messages found in this session.`, toolCalls: [] }]);
+        return;
+      }
+
+      // Map LangChain message dicts → frontend format
+      // Each dict: { type: "human"|"ai"|"tool", content: string, tool_calls?: [] }
+      const mapped = rawMessages
+        .filter((m) => m.type === 'human' || m.type === 'ai')
+        .map((m) => ({
+          role: m.type === 'human' ? 'user' : 'bot',
+          text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
+          toolCalls: m.tool_calls?.map((tc) => tc.name).filter(Boolean) ?? [],
+        }));
+
+      setMessages(mapped.length > 0 ? mapped : [
+        { role: 'bot', text: `📂 **${session.title}**\n\nNo readable messages found.`, toolCalls: [] },
+      ]);
+    } catch (err) {
+      console.error('Failed to load chat:', err);
+      setMessages([{ role: 'bot', text: `⚠️ Failed to load conversation. Please try again.`, toolCalls: [] }]);
+    }
+  }, []);
+
   const sendMessage = useCallback(async (text) => {
     const userMsg = text || input.trim();
     if (!userMsg || streaming) return;
 
     setInput('');
     setStreaming(true);
-    userScrolledUp.current = false; // reset scroll position for new message
+    userScrolledUp.current = false;
+
+    // Auto-create session on first message if none active (TASK 3)
+    let sessionId = activeChatId;
+    if (!sessionId && authUser) {
+      sessionId = await createSession(userMsg);
+    }
 
     // Add user message + empty bot message to stream into
     setMessages((prev) => [
@@ -162,8 +253,6 @@ export default function AIChatbot() {
       } catch {
         // Use default (Vadodara, Gujarat)
       }
-      //Use a database to store user chat details in postgres (just user_id , chat_id ) currently used hardcoded values for testing. 
-      const user = { _id: 'gujarat_test_user_9', name: 'Dev Chavda', language: 'Gujarati' };
 
       const response = await fetch(`${AI_SERVICE_URL}/chat/query`, {
         method: 'POST',
@@ -172,9 +261,9 @@ export default function AIChatbot() {
           lat,
           lon,
           query: userMsg,
-          user_id: user._id || 'anonymous',
-          user_name: user.name || 'Farmer',
-          language: user.language || 'English',
+          user_id: String(sessionId || user._id),  // use session id as thread_id so each chat has its own history
+          user_name: user.name,
+          language: user.language,
         }),
         signal: controller.signal,
       });
@@ -212,12 +301,11 @@ export default function AIChatbot() {
 
               if (currentEvent === 'text' && data.data) {
                 const token = data.data;
-                botResponseText += token;  // track for logging
+                botResponseText += token;
                 setMessages((prev) => {
                   const copy = [...prev];
                   const last = copy[copy.length - 1];
                   if (last?.role === 'bot') {
-                    // Clone the message object — never mutate in place
                     copy[copy.length - 1] = { ...last, text: last.text + token };
                   }
                   return copy;
@@ -246,10 +334,8 @@ export default function AIChatbot() {
             } catch {
               // skip malformed JSON
             }
-            // Reset event after data line processed
             currentEvent = null;
           } else if (line === '') {
-            // blank line = end of SSE event block, reset state
             currentEvent = null;
           }
         }
@@ -274,51 +360,100 @@ export default function AIChatbot() {
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [input, streaming]);
+  }, [input, streaming, activeChatId, user, createSession, authUser]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     sendMessage();
   };
 
+  // Whether we should show suggestions (only when conversation just started)
+  const showSuggestions = !streaming;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/30 to-white dark:from-dark-bg dark:to-dark-card">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-4">
-          <h1 className="text-2xl md:text-3xl font-bold font-display">🤖 Agronex AI Assistant</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Real-time farming advice powered by AI</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-3">
+          <h1 className="text-xl md:text-2xl font-bold font-display">🤖 Agronex AI Assistant</h1>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Real-time farming advice powered by AI</p>
         </motion.div>
 
-        <div className="max-w-4xl mx-auto w-full grid lg:grid-cols-4 gap-6">
-          {/* Suggested Questions */}
-          <div className="lg:col-span-1 space-y-3">
-            <h3 className="font-display font-semibold text-sm flex items-center gap-2 text-gray-700 dark:text-gray-300 mb-3">
-              <HiLightBulb className="w-4 h-4 text-yellow-500" />
-              Suggested Questions
-            </h3>
-            {suggestedQuestions.map((q, i) => (
+        <div className="max-w-6xl mx-auto w-full grid lg:grid-cols-6 gap-4">
+          {/* ── LEFT PANEL: Chat History ── */}
+          <div className="lg:col-span-1 space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-display font-semibold text-sm flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                <HiChatAlt2 className="w-4 h-4 text-primary-500" />
+                Chat History
+              </h3>
               <button
-                key={i}
-                onClick={() => sendMessage(q)}
-                disabled={streaming}
-                className="w-full text-left text-sm p-3 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleNewChat}
+                className="p-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-600 dark:text-primary-400 transition-colors"
+                title="New Chat"
               >
-                {q}
+                <HiPlus className="w-4 h-4" />
               </button>
-            ))}
+            </div>
+
+            {/* New Chat button */}
+            <button
+              onClick={handleNewChat}
+              className={`w-full text-left text-xs p-2 rounded-lg border transition-all flex items-center gap-1.5
+                ${!activeChatId
+                  ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300 font-medium'
+                  : 'bg-white dark:bg-dark-card border-gray-200 dark:border-dark-border text-gray-700 dark:text-gray-300 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-900/10'
+                }`}
+            >
+              <HiPlus className="w-3.5 h-3.5 flex-shrink-0" />
+              New Chat
+            </button>
+
+            {/* History list */}
+            {historyLoading ? (
+              <div className="text-center py-4">
+                <div className="w-5 h-5 border-2 border-primary-400 border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-xs text-gray-400 mt-2">Loading history…</p>
+              </div>
+            ) : chatHistory.length > 0 ? (
+              <div className="space-y-1 max-h-[calc(100vh-340px)] overflow-y-auto">
+                {chatHistory.map((session) => (
+                  <button
+                    key={session.chat_id}
+                    onClick={() => handleLoadChat(session)}
+                    className={`w-full text-left text-xs p-2 rounded-lg border transition-all group
+                      ${activeChatId === session.chat_id
+                        ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300'
+                        : 'bg-white dark:bg-dark-card border-gray-200 dark:border-dark-border text-gray-700 dark:text-gray-300 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-900/10'
+                      }`}
+                  >
+                    <p className="truncate font-medium text-xs">{session.title}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1">
+                      <HiClock className="w-2.5 h-2.5" />
+                      {new Date(session.created_at).toLocaleDateString()}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <HiChatAlt2 className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                <p className="text-xs text-gray-400 dark:text-gray-500">No chat history yet.</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">Start a conversation!</p>
+              </div>
+            )}
           </div>
 
-          {/* Chat Window — fixed viewport height so only messages scroll */}
-          <div className="lg:col-span-3 glass-card flex flex-col" style={{ height: 'calc(100vh - 220px)' }}>
+          {/* ── RIGHT PANEL: Chat Window ── */}
+          <div className="lg:col-span-5 glass-card flex flex-col" style={{ height: 'calc(100vh - 150px)' }}>
             {/* Chat Header */}
-            <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-dark-border flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-lg">
+            <div className="flex-shrink-0 px-4 py-2.5 border-b border-gray-200 dark:border-dark-border flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm">
                 🤖
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800 dark:text-white">Agronex AI</h3>
-                <p className="text-xs text-green-500 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <h3 className="font-semibold text-sm text-gray-800 dark:text-white">Agronex AI</h3>
+                <p className="text-[10px] text-green-500 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                   Online • Real-time data
                 </p>
               </div>
@@ -328,7 +463,7 @@ export default function AIChatbot() {
             <div
               ref={chatContainerRef}
               onScroll={handleScroll}
-              className="flex-1 overflow-y-auto p-4 space-y-4"
+              className="flex-1 overflow-y-auto px-4 py-3 space-y-3"
             >
               {messages.map((msg, i) => (
                 <motion.div
@@ -371,21 +506,38 @@ export default function AIChatbot() {
               ))}
             </div>
 
+            {/* ── Suggestions above input ── */}
+            {showSuggestions && (
+              <div className="flex-shrink-0 px-4 py-2 flex items-center gap-2 overflow-x-auto">
+                <HiLightBulb className="w-3.5 h-3.5 text-yellow-500 flex-shrink-0" />
+                {suggestedQuestions.map((q, i) => (
+                  <button
+                    key={i}
+                    onClick={() => sendMessage(q)}
+                    disabled={streaming}
+                    className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-900/10 text-gray-600 dark:text-gray-400 transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Input — fixed at bottom */}
-            <form onSubmit={handleSubmit} className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-dark-border">
-              <div className="flex gap-3">
+            <form onSubmit={handleSubmit} className="flex-shrink-0 px-4 py-2.5 border-t border-gray-200 dark:border-dark-border">
+              <div className="flex gap-2">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Type your farming question..."
-                  className="input-field flex-1 py-3"
+                  className="input-field flex-1 py-2.5 text-sm"
                   disabled={streaming}
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || streaming}
-                  className="btn-primary px-5 disabled:opacity-50"
+                  className="btn-primary px-4 disabled:opacity-50"
                 >
                   <HiPaperAirplane className="w-5 h-5 rotate-90" />
                 </button>

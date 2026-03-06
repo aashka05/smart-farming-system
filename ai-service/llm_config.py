@@ -2,7 +2,7 @@ from langchain_ollama import ChatOllama
 import os 
 
 
-def get_llm(model = "mistral-large-3:675b-cloud" , temperature = 0)->ChatOllama:
+def get_llm(model = "gpt-oss:120b-cloud" , temperature = 0)->ChatOllama:
     client_kwargs = {
         "headers":{
             "authorization": f"Bearer {os.getenv('OLLAMA_API_KEY')}"

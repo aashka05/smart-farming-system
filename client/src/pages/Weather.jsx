@@ -61,6 +61,93 @@ function getCondition(temp, rain) {
   return 'partly-cloudy';
 }
 
+/**
+ * Analyze 7-day forecast data and generate smart farming insights.
+ */
+function generateSmartInsights(forecastData) {
+  if (!forecastData || forecastData.length === 0) return [];
+
+  const insights = [];
+
+  // Heavy rainfall expected
+  const heavyRainDays = forecastData.filter((d) => d.rain > 70);
+  if (heavyRainDays.length > 0) {
+    insights.push({
+      icon: '🌧️',
+      title: 'Heavy Rainfall Expected',
+      message: `Rain expected in coming days (${heavyRainDays.map((d) => d.day).join(', ')}). Reduce irrigation to avoid waterlogging.`,
+      severity: 'high',
+    });
+  }
+
+  // High temperature predicted
+  const hotDays = forecastData.filter((d) => d.temp > 35);
+  if (hotDays.length > 0) {
+    insights.push({
+      icon: '🔥',
+      title: 'High Temperature Predicted',
+      message: `High temperature predicted (${hotDays.map((d) => `${d.day}: ${d.temp}°C`).join(', ')}). Ensure adequate irrigation and crop protection.`,
+      severity: 'high',
+    });
+  }
+
+  // High humidity risk (moderate-to-high rain probability implies humidity)
+  const humidDays = forecastData.filter((d) => d.rain >= 50 && d.rain <= 70);
+  if (humidDays.length >= 2) {
+    insights.push({
+      icon: '💧',
+      title: 'High Humidity Risk',
+      message: 'High humidity may increase fungal disease risk. Monitor crops for signs of blight, mildew, or rot.',
+      severity: 'medium',
+    });
+  }
+
+  // Natural rainfall expected soon (next 3 days)
+  const nearTermRain = forecastData.slice(0, 3).filter((d) => d.rain > 40);
+  if (nearTermRain.length > 0 && heavyRainDays.length === 0) {
+    insights.push({
+      icon: '⏳',
+      title: 'Natural Rainfall Expected Soon',
+      message: 'Natural rainfall expected in the next few days. Delay irrigation scheduling to conserve water and resources.',
+      severity: 'low',
+    });
+  }
+
+  // Cold temperature alert
+  const coldDays = forecastData.filter((d) => d.temp < 15);
+  if (coldDays.length > 0) {
+    insights.push({
+      icon: '🥶',
+      title: 'Cold Temperature Alert',
+      message: `Low temperatures expected (${coldDays.map((d) => `${d.day}: ${d.temp}°C`).join(', ')}). Protect sensitive crops from frost damage.`,
+      severity: 'medium',
+    });
+  }
+
+  // Dry spell — minimal rain all week
+  const dryDays = forecastData.filter((d) => d.rain < 20);
+  if (dryDays.length >= 5) {
+    insights.push({
+      icon: '🏜️',
+      title: 'Dry Spell Expected',
+      message: 'Minimal rainfall predicted for most of the week. Plan irrigation schedules accordingly and conserve water.',
+      severity: 'medium',
+    });
+  }
+
+  // Favorable conditions fallback
+  if (insights.length === 0) {
+    insights.push({
+      icon: '🌱',
+      title: 'Favorable Farming Conditions',
+      message: 'Weather conditions look favorable for farming activities over the next 7 days. Good time for field operations.',
+      severity: 'low',
+    });
+  }
+
+  return insights;
+}
+
 export default function Weather() {
   const [city, setCity] = useState('Anand');
   const [searchInput, setSearchInput] = useState('');
@@ -299,6 +386,44 @@ export default function Weather() {
                 </ResponsiveContainer>
               </div>
             </motion.div>
+
+            {/* Smart Farming Insights */}
+            {forecastData.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="glass-card p-6 mb-10"
+              >
+                <h3 className="font-display font-semibold text-lg mb-2 flex items-center gap-2">
+                  <HiLightBulb className="w-5 h-5 text-green-500" />
+                  🌾 Smart Farming Insights
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+                  Recommendations based on the 7-day weather forecast for {city}
+                </p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {generateSmartInsights(forecastData).map((insight, i) => {
+                    const severityStyles = {
+                      high: 'border-red-400 bg-red-50 dark:bg-red-900/10',
+                      medium: 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10',
+                      low: 'border-green-400 bg-green-50 dark:bg-green-900/10',
+                    };
+                    return (
+                      <div key={i} className={`p-4 rounded-xl border-l-4 ${severityStyles[insight.severity]}`}>
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl shrink-0">{insight.icon}</span>
+                          <div>
+                            <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200 mb-1">{insight.title}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{insight.message}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
 
             {/* Weather Alerts */}
             <motion.div
