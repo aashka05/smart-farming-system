@@ -455,7 +455,7 @@ export default function AIChatbot() {
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Real-time farming advice powered by AI</p>
         </motion.div>
 
-        <div className="max-w-6xl mx-auto w-full grid lg:grid-cols-6 gap-4">
+        <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-6 gap-4">
           {/* ── LEFT PANEL: Chat History ── */}
           <div className="lg:col-span-1 space-y-2">
             <div className="flex items-center justify-between mb-2">
@@ -521,7 +521,7 @@ export default function AIChatbot() {
           </div>
 
           {/* ── RIGHT PANEL: Chat Window ── */}
-          <div className="lg:col-span-5 glass-card flex flex-col" style={{ height: 'calc(100vh - 150px)' }}>
+          <div className="lg:col-span-5 glass-card flex flex-col h-[calc(100vh-160px)] md:h-[calc(100vh-150px)]">
             {/* Chat Header */}
             <div className="flex-shrink-0 px-4 py-2.5 border-b border-gray-200 dark:border-dark-border flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm">
@@ -550,10 +550,10 @@ export default function AIChatbot() {
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
-                      ? 'bg-primary-500 text-white rounded-br-md'
-                      : 'bg-gray-100 dark:bg-dark-card text-gray-800 dark:text-gray-200 rounded-bl-md border border-gray-200 dark:border-dark-border'
-                      }`}
+                    className={`max-w-full sm:max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
+                        ? 'bg-primary-500 text-white rounded-br-md'
+                        : 'bg-gray-100 dark:bg-dark-card text-gray-800 dark:text-gray-200 rounded-bl-md border border-gray-200 dark:border-dark-border'
+                        }`}
                   >
                     {/* Tool call pills */}
                     {msg.role === 'bot' && msg.toolCalls?.length > 0 && (
