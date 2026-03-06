@@ -200,14 +200,27 @@ export default function AIChatbot() {
       }
 
       // Map LangChain message dicts → frontend format
-      // Each dict: { type: "human"|"ai"|"tool", content: string, tool_calls?: [] }
+      // Supports both shapes: { type: "human"|"ai" } and { role: "user"|"assistant" }
       const mapped = rawMessages
-        .filter((m) => m.type === 'human' || m.type === 'ai')
-        .map((m) => ({
-          role: m.type === 'human' ? 'user' : 'bot',
-          text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
-          toolCalls: m.tool_calls?.map((tc) => tc.name).filter(Boolean) ?? [],
-        }));
+        .filter((m) => {
+          const kind = m.type || m.role;
+          return kind === 'human' || kind === 'ai' || kind === 'user' || kind === 'assistant';
+        })
+        .filter((m) => {
+          // Skip empty AI/assistant messages (e.g. tool-only turns)
+          const kind = m.type || m.role;
+          if ((kind === 'ai' || kind === 'assistant') && !m.content) return false;
+          return true;
+        })
+        .map((m) => {
+          const kind = m.type || m.role;
+          const isUser = kind === 'human' || kind === 'user';
+          return {
+            role: isUser ? 'user' : 'bot',
+            text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
+            toolCalls: m.tool_calls?.map((tc) => tc.name).filter(Boolean) ?? [],
+          };
+        });
 
       setMessages(mapped.length > 0 ? mapped : [
         { role: 'bot', text: `📂 **${session.title}**\n\nNo readable messages found.`, toolCalls: [] },
@@ -347,7 +360,7 @@ export default function AIChatbot() {
 
       // Log chat interaction to backend (fire-and-forget)
       if (botResponseText) {
-        api.post('/chat/log', { question: userMsg, response: botResponseText }).catch(() => {});
+        api.post('/chat/log', { question: userMsg, response: botResponseText }).catch(() => { });
       }
     } catch (err) {
       if (err.name !== 'AbortError') {
@@ -551,9 +564,9 @@ export default function AIChatbot() {
                 >
                   <div
                     className={`max-w-full sm:max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
-                        ? 'bg-primary-500 text-white rounded-br-md'
-                        : 'bg-gray-100 dark:bg-dark-card text-gray-800 dark:text-gray-200 rounded-bl-md border border-gray-200 dark:border-dark-border'
-                        }`}
+                      ? 'bg-primary-500 text-white rounded-br-md'
+                      : 'bg-gray-100 dark:bg-dark-card text-gray-800 dark:text-gray-200 rounded-bl-md border border-gray-200 dark:border-dark-border'
+                      }`}
                   >
                     {/* Tool call pills */}
                     {msg.role === 'bot' && msg.toolCalls?.length > 0 && (
