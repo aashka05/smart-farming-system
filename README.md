@@ -44,20 +44,12 @@ To run the AI service locally:
 cd smart-farming-system/ai-service
 ```
 
-### 2. Set up a virtual environment (optional but recommended)
-```bash
-python -m venv venv
-```
-Activate the virtual environment:
-- **Windows**: `venv\Scripts\activate`
-- **macOS/Linux**: `source venv/bin/activate`
-
-### 3. Install dependencies
+### 2. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Start the AI service
+### 3. Start the AI service
 ```bash
 uvicorn main:app --reload
 ```

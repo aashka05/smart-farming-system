@@ -34,11 +34,11 @@ try:
         _llm = get_llm()
         _checkpointer = _get_cp()
         _agent_available = True
-        print("✅ LLM agent loaded (Ollama Cloud)")
+        print("[OK] LLM agent loaded (Ollama Cloud)")
     else:
-        print("ℹ️  OLLAMA_API_KEY not set → using tool-only fallback mode")
+        print("[INFO] OLLAMA_API_KEY not set, using tool-only fallback mode")
 except Exception as e:
-    print(f"⚠️  LLM init failed ({e}) → using tool-only fallback mode")
+    print(f"[WARN] LLM init failed ({e}), using tool-only fallback mode")
 
 _geocode_cache: dict[tuple[float, float], str] = {}
 
