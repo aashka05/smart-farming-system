@@ -1,8 +1,7 @@
-from fastapi import APIRouter , HTTPException, UploadFile
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from starlette.responses import StreamingResponse 
+from starlette.responses import StreamingResponse
 from pydantic import BaseModel
-from groq import AsyncGroq
 from typing import Optional
 from geopy.geocoders import Nominatim
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
@@ -410,30 +409,6 @@ async def respond(request: RequestQuery):
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"},
     )
-class SpeechToText:
-    def __init__(self):
-        self.model : AsyncGroq = AsyncGroq(api_key=os.getenv('GROQ_API_KEY'))
-
-    async def speech_to_text(self , file : UploadFile):
-        if file.content_type not in ("audio/wav" , "audio/x-wav"):
-            raise HTTPException(400 , "Only wav files are supported")
-        audio = await file.read()
-        if(len(audio) <= 1000):
-            return dict(filename = file.filename , text = "")
-        if(len(audio)>10*1024*1024):
-            raise HTTPException(400,"File Size must be less than 10 mb")
-        result = await self.model.audio.transcriptions.create(
-            file = (file.filename , audio),
-            model = "whisper-large-v3-turbo"
-        )
-        return dict(filename = file.filename , text = result.text.strip())
-
-@router.post("/stt")
-async def get_text_from_speech(file:UploadFile):
-    st = SpeechToText()
-    response_dict : dict = await st.speech_to_text(file)
-    #response_dict schema (text : str , filename:str) 
-    return JSONResponse(content=response_dict)
 def _chunk_text(text: str, size: int = 8) -> list[str]:
     """Split text into small chunks for streaming effect."""
     words = text.split(" ")
