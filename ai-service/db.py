@@ -22,10 +22,10 @@ def get_checkpointer():
             client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
             # Quick connectivity test
             client.admin.command("ping")
-            print("✅ MongoDB checkpointer connected")
+            print("[OK] MongoDB checkpointer connected")
             return MongoDBSaver(client)
         except Exception as e:
-            print(f"⚠️  MongoDB unavailable ({e}), using in-memory checkpointer")
+            print(f"[WARN] MongoDB unavailable ({e}), using in-memory checkpointer")
     else:
-        print("ℹ️  No MONGO_URI set, using in-memory checkpointer")
+        print("[INFO] No MONGO_URI set, using in-memory checkpointer")
     return MemorySaver()

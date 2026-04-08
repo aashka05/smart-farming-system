@@ -16,7 +16,4 @@ langchain-core
 langchain-ollama
 langgraph
 langgraph-checkpoint-mongodb
-groq
 python-multipart
-scikit-learn
-python-dotenv
